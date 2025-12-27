@@ -144,6 +144,33 @@ class SettingsScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
+
+                // Credits
+                const Text(
+                  'DEVELOPED BY',
+                  style: TextStyle(
+                    color: Colors.white10,
+                    fontSize: 8,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildCreditLink('Hunter87', Config.devGithubUrl),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('|', style: TextStyle(color: Colors.white10)),
+                    ),
+                    _buildCreditLink('NexinLabs', Config.orgGithubUrl),
+                  ],
+                ),
+
+                const SizedBox(height: 20),
+
+                // App Name and Version
                 const Text(
                   '${Config.appName} v${Config.appVersion}',
                   style: TextStyle(
@@ -160,28 +187,7 @@ class SettingsScreen extends ConsumerWidget {
                     fontSize: 10,
                   ),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'DEVELOPED BY',
-                  style: TextStyle(
-                    color: Colors.white10,
-                    fontSize: 8,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _buildCreditLink('hunter87ff', Config.devGithubUrl),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text('|', style: TextStyle(color: Colors.white10)),
-                    ),
-                    _buildCreditLink('Nexin Labs', Config.orgGithubUrl),
-                  ],
-                ),
+
               ],
             ),
           ),
