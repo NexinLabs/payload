@@ -11,6 +11,9 @@ import '../../features/request/components/response_view.dart';
 import '../../layout/navigation_shell.dart';
 import '../models/http_request.dart';
 
+import '../../features/collections/collection_settings_screen.dart';
+import '../../core/models/collection.dart';
+
 class ResponseViewArguments {
   final dio.Response? response;
   final HttpRequestModel request;
@@ -26,6 +29,7 @@ class AppRouter {
   static const String requestEditor = '/request-editor';
   static const String socket = '/socket';
   static const String responseView = '/response-view';
+  static const String collectionSettings = '/collection-settings';
 
   static final router = GoRouter(
     initialLocation: root,
@@ -63,6 +67,13 @@ class AppRouter {
         builder: (context, state) {
           final args = state.extra as ResponseViewArguments;
           return ResponseView(response: args.response, request: args.request);
+        },
+      ),
+      GoRoute(
+        path: collectionSettings,
+        builder: (context, state) {
+          final collection = state.extra as CollectionModel;
+          return CollectionSettingsScreen(collection: collection);
         },
       ),
     ],

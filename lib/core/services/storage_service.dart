@@ -103,14 +103,14 @@ class StorageService {
       CollectionModel(
         id: '1',
         name: 'Sample API',
-        requests: [
-          HttpRequestModel(
+        requests: {
+          'req_1': HttpRequestModel(
             id: 'req_1',
             name: 'Get Users',
             method: 'GET',
             url: 'https://jsonplaceholder.typicode.com/users',
           ),
-          HttpRequestModel(
+          'req_2': HttpRequestModel(
             id: 'req_2',
             name: 'Create Post',
             method: 'POST',
@@ -119,7 +119,7 @@ class StorageService {
             bodyType: 'json',
             headers: [KeyValue(key: 'Content-Type', value: 'application/json')],
           ),
-        ],
+        },
       ),
     ];
   }

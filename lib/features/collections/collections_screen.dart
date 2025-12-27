@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/storage_providers.dart';
 import '../../core/models/collection.dart';
 import '../../core/router/app_router.dart';
+import '../../core/models/http_request.dart';
 
 class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
@@ -48,43 +49,72 @@ class CollectionsScreen extends ConsumerWidget {
                     itemCount: collections.length,
                     itemBuilder: (context, index) {
                       final collection = collections[index];
-                      return ExpansionTile(
-                        leading: const Icon(
-                          Icons.folder_open,
-                          color: Colors.amber,
-                        ),
-                        title: Text(
-                          collection.name,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        subtitle: Text(
-                          '${collection.requests.length} requests',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.5),
-                            fontSize: 12,
+                      return GestureDetector(
+                        onLongPress: () =>
+                            _showCollectionOptions(context, ref, collection),
+                        child: ExpansionTile(
+                          leading: const Icon(
+                            Icons.folder_open,
+                            color: Colors.amber,
                           ),
+                          title: Text(
+                            collection.name,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.settings_outlined,
+                                  size: 18,
+                                ),
+                                onPressed: () {
+                                  AppRouter.push(
+                                    context,
+                                    AppRouter.collectionSettings,
+                                    arguments: collection,
+                                  );
+                                },
+                              ),
+                              const Icon(Icons.expand_more),
+                            ],
+                          ),
+                          subtitle: Text(
+                            '${collection.requests.length} requests',
+                            style: TextStyle(
+                              color: Colors.white.withOpacity(0.5),
+                              fontSize: 12,
+                            ),
+                          ),
+                          children: collection.requests.values.map((request) {
+                            return ListTile(
+                              contentPadding: const EdgeInsets.only(
+                                left: 32,
+                                right: 16,
+                              ),
+                              leading: _MethodIndicator(method: request.method),
+                              title: Text(
+                                request.name,
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.more_vert, size: 18),
+                                onPressed: () =>
+                                    _showRequestOptions(context, ref, request),
+                              ),
+                              onTap: () {
+                                AppRouter.push(
+                                  context,
+                                  AppRouter.requestEditor,
+                                  arguments: request,
+                                );
+                              },
+                              onLongPress: () =>
+                                  _showRequestOptions(context, ref, request),
+                            );
+                          }).toList(),
                         ),
-                        children: collection.requests.map((request) {
-                          return ListTile(
-                            contentPadding: const EdgeInsets.only(
-                              left: 32,
-                              right: 16,
-                            ),
-                            leading: _MethodIndicator(method: request.method),
-                            title: Text(
-                              request.name,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                            trailing: const Icon(Icons.more_vert, size: 18),
-                            onTap: () {
-                              AppRouter.push(
-                                context,
-                                AppRouter.requestEditor,
-                                arguments: request,
-                              );
-                            },
-                          );
-                        }).toList(),
                       );
                     },
                   ),
@@ -94,6 +124,113 @@ class CollectionsScreen extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddCollectionDialog(context, ref),
         child: const Icon(Icons.create_new_folder_outlined),
+      ),
+    );
+  }
+
+  void _showCollectionOptions(
+    BuildContext context,
+    WidgetRef ref,
+    CollectionModel collection,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.edit, color: Colors.white70),
+            title: const Text(
+              'Edit Collection',
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              AppRouter.push(
+                context,
+                AppRouter.collectionSettings,
+                arguments: collection,
+              );
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.redAccent),
+            title: const Text(
+              'Delete Collection',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+            onTap: () {
+              ref
+                  .read(collectionsProvider.notifier)
+                  .deleteCollection(collection.id);
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showRequestOptions(
+    BuildContext context,
+    WidgetRef ref,
+    HttpRequestModel request,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E1E1E),
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.copy, color: Colors.white70),
+            title: const Text(
+              'Duplicate Request',
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              final newRequest = HttpRequestModel(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                name: '${request.name} (Copy)',
+                method: request.method,
+                url: request.url,
+                headers: List.from(request.headers),
+                params: List.from(request.params),
+                formData: List.from(request.formData),
+                filePaths: List.from(request.filePaths),
+                body: request.body,
+                bodyType: request.bodyType,
+              );
+              // Find which collection this request belongs to
+              final collections = ref.read(collectionsProvider);
+              String? collectionId;
+              for (var c in collections) {
+                if (c.requests.containsKey(request.id)) {
+                  collectionId = c.id;
+                  break;
+                }
+              }
+              if (collectionId != null) {
+                ref
+                    .read(collectionsProvider.notifier)
+                    .addRequestToCollection(collectionId, newRequest);
+              }
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: const Icon(Icons.delete, color: Colors.redAccent),
+            title: const Text(
+              'Delete Request',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+            onTap: () {
+              ref.read(collectionsProvider.notifier).deleteRequest(request.id);
+              Navigator.pop(context);
+            },
+          ),
+        ],
       ),
     );
   }

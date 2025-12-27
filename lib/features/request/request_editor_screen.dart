@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
-import 'components/response_view.dart';
 import 'components/request_sidebar.dart';
 import '../../core/models/http_request.dart';
 import '../../core/models/collection.dart';
@@ -57,39 +56,73 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
-    _requestId =
-        widget.request?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
-    _urlController = TextEditingController(text: widget.request?.url ?? '');
-    _nameController = TextEditingController(
-      text: widget.request?.name ?? 'New Request',
-    );
-    _bodyController = TextEditingController(text: widget.request?.body ?? '');
-    _selectedMethod = widget.request?.method ?? 'GET';
-    _bodyType = widget.request?.bodyType ?? 'none';
-    _headers = List.from(
-      widget.request?.headers ?? [KeyValue(key: '', value: '')],
-    );
-    _params = List.from(
-      widget.request?.params ?? [KeyValue(key: '', value: '')],
-    );
-    _formData = List.from(
-      widget.request?.formData ?? [KeyValue(key: '', value: '')],
-    );
-    _filePaths = List.from(widget.request?.filePaths ?? []);
+    _urlController = TextEditingController();
+    _nameController = TextEditingController();
+    _bodyController = TextEditingController();
+
+    _loadRequest(widget.request);
 
     _urlController.addListener(_onUrlChanged);
+  }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.request != null) {
-        final collections = ref.read(collectionsProvider);
-        for (final c in collections) {
-          if (c.requests.any((r) => r.id == widget.request!.id)) {
-            ref.read(selectedCollectionIdProvider.notifier).state = c.id;
-            break;
-          }
+  @override
+  void didUpdateWidget(RequestEditorScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.request?.id != oldWidget.request?.id) {
+      _loadRequest(widget.request);
+    }
+  }
+
+  void _loadRequest(HttpRequestModel? request) {
+    _requestId =
+        request?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
+    _urlController.text = request?.url ?? '';
+    _nameController.text = request?.name ?? 'New Request';
+    _bodyController.text = request?.body ?? '';
+    _selectedMethod = request?.method ?? 'GET';
+    _bodyType = request?.bodyType ?? 'none';
+    _headers = List.from(
+      request?.headers ?? [KeyValue(key: '', value: '')],
+    );
+    _params = List.from(
+      request?.params ?? [KeyValue(key: '', value: '')],
+    );
+    _formData = List.from(
+      request?.formData ?? [KeyValue(key: '', value: '')],
+    );
+    _filePaths = List.from(request?.filePaths ?? []);
+    _response = null;
+
+    // Clear dynamic controllers to avoid showing old values
+    for (var controller in _keyControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in _valueControllers.values) {
+      controller.dispose();
+    }
+    _keyControllers.clear();
+    _valueControllers.clear();
+
+    if (_tabController.index != 0) {
+      _tabController.index = 0;
+    }
+
+    if (mounted) {
+      setState(() {});
+    }
+    _updateCollectionSelection(request);
+  }
+
+  void _updateCollectionSelection(HttpRequestModel? request) {
+    if (request != null) {
+      final collections = ref.read(collectionsProvider);
+      for (final c in collections) {
+        if (c.requests.containsKey(request.id)) {
+          ref.read(selectedCollectionIdProvider.notifier).state = c.id;
+          break;
         }
       }
-    });
+    }
   }
 
   void _onUrlChanged() {
@@ -181,7 +214,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
       bool exists = false;
       for (var c in collections) {
-        if (c.requests.any((r) => r.id == request.id)) {
+        if (c.requests.containsKey(request.id)) {
           exists = true;
           break;
         }
@@ -237,7 +270,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
         final newColl = CollectionModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           name: 'My Requests',
-          requests: [request],
+          requests: {request.id: request},
         );
         await ref.read(collectionsProvider.notifier).addCollection(newColl);
       } else if (selectedId != null) {

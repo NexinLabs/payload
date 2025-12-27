@@ -36,7 +36,7 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     if (collection.requests.isNotEmpty) {
       await _storage.saveRequestToFileSystem(
         collection,
-        collection.requests.last,
+        collection.requests.values.last,
       );
     }
   }
@@ -63,7 +63,9 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
       for (final c in state)
         if (c.id == collectionId)
           (() {
-            updatedCollection = c.copyWith(requests: [...c.requests, request]);
+            updatedCollection = c.copyWith(
+              requests: {...c.requests, request.id: request},
+            );
             return updatedCollection!;
           })()
         else
@@ -80,13 +82,9 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     state = [
       for (final c in state)
         (() {
-          final hasRequest = c.requests.any((r) => r.id == request.id);
-          if (hasRequest) {
+          if (c.requests.containsKey(request.id)) {
             final newColl = c.copyWith(
-              requests: [
-                for (final r in c.requests)
-                  if (r.id == request.id) request else r,
-              ],
+              requests: {...c.requests, request.id: request},
             );
             updatedCollection = newColl;
             return newColl;
@@ -98,6 +96,19 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     if (updatedCollection != null) {
       await _storage.saveRequestToFileSystem(updatedCollection!, request);
     }
+  }
+
+  Future<void> deleteRequest(String requestId) async {
+    state = [
+      for (final c in state)
+        if (c.requests.containsKey(requestId))
+          c.copyWith(
+            requests: Map.from(c.requests)..remove(requestId),
+          )
+        else
+          c,
+    ];
+    await _storage.saveCollections(state);
   }
 }
 
