@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/providers/storage_providers.dart';
-import '../../../core/models/collection.dart';
-import '../../../core/models/http_request.dart';
-import '../../request/screens/request_editor_screen.dart';
+import '../../core/providers/storage_providers.dart';
+import '../../core/models/collection.dart';
+import '../request/request_editor_screen.dart';
 
 class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});

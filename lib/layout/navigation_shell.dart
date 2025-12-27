@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:payload/features/dashboard/screens/dashboard_screen.dart';
-import 'package:payload/features/history/screens/history_screen.dart';
-import 'package:payload/features/collections/screens/collections_screen.dart';
-import 'package:payload/features/settings/screens/settings_screen.dart';
-import 'package:payload/features/request/screens/request_editor_screen.dart';
+import 'package:payload/features/dashboard/dashboard_screen.dart';
+import 'package:payload/features/history/history_screen.dart';
+import 'package:payload/features/collections/collections_screen.dart';
+import 'package:payload/features/settings/settings_screen.dart';
+import 'package:payload/features/request/request_editor_screen.dart';
 
 class NavigationShell extends StatefulWidget {
   const NavigationShell({super.key});
@@ -132,8 +132,8 @@ class AppDrawer extends StatelessWidget {
                     color: Colors.white.withOpacity(0.05),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Row(
-                    children: const [
+                  child: const Row(
+                    children: [
                       Icon(
                         Icons.workspaces_outline,
                         size: 16,

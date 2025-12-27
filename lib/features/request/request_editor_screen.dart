@@ -4,10 +4,10 @@ import 'package:dio/dio.dart' as dio;
 import 'dart:convert';
 import 'package:flutter_json_view/flutter_json_view.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
-import '../../../core/models/http_request.dart';
-import '../../../core/models/collection.dart';
-import '../../../core/services/request_service.dart';
-import '../../../core/providers/storage_providers.dart';
+import '../../core/models/http_request.dart';
+import '../../core/models/collection.dart';
+import '../../core/services/request_service.dart';
+import '../../core/providers/storage_providers.dart';
 
 class RequestEditorScreen extends ConsumerStatefulWidget {
   final HttpRequestModel? request;
@@ -210,9 +210,9 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                 Expanded(
                   child: TextField(
                     controller: _urlController,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       hintText: 'https://api.example.com/v1/resource',
-                      contentPadding: const EdgeInsets.symmetric(
+                      contentPadding: EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 12,
                       ),

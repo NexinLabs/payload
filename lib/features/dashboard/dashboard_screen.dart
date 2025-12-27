@@ -3,9 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/core/widgets/stat_card.dart';
 import 'package:payload/core/widgets/quick_action_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:payload/features/request/screens/request_editor_screen.dart';
-import 'package:payload/features/socket/screens/socket_screen.dart';
-import '../../../core/providers/storage_providers.dart';
+import 'package:payload/features/request/request_editor_screen.dart';
+import 'package:payload/features/socket/socket_screen.dart';
+import '../../core/providers/storage_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -14,7 +14,10 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(historyProvider);
     final collections = ref.watch(collectionsProvider);
-    final totalRequests = collections.fold(0, (sum, c) => sum + c.requests.length);
+    final totalRequests = collections.fold(
+      0,
+      (sum, c) => sum + c.requests.length,
+    );
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -144,7 +147,8 @@ class DashboardScreen extends ConsumerWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => RequestEditorScreen(request: request),
+                        builder: (context) =>
+                            RequestEditorScreen(request: request),
                       ),
                     );
                   },
@@ -224,11 +228,20 @@ class _MethodBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color;
     switch (method) {
-      case 'GET': color = Colors.green; break;
-      case 'POST': color = Colors.blue; break;
-      case 'PUT': color = Colors.orange; break;
-      case 'DELETE': color = Colors.red; break;
-      default: color = Colors.grey;
+      case 'GET':
+        color = Colors.green;
+        break;
+      case 'POST':
+        color = Colors.blue;
+        break;
+      case 'PUT':
+        color = Colors.orange;
+        break;
+      case 'DELETE':
+        color = Colors.red;
+        break;
+      default:
+        color = Colors.grey;
     }
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
