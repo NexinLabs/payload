@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:file_picker/file_picker.dart';
 import '../../../core/models/collection.dart';
 import '../../../core/models/http_request.dart';
 
@@ -23,6 +24,65 @@ class SettingsUtils {
     await file.writeAsString(jsonString);
 
     await Share.shareXFiles([XFile(file.path)], subject: 'Payload Data Export');
+  }
+
+  static Future<Map<String, dynamic>?> importData() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['json'],
+      );
+
+      if (result == null || result.files.single.path == null) return null;
+
+      final file = File(result.files.single.path!);
+      final jsonString = await file.readAsString();
+      final dynamic decoded = json.decode(jsonString);
+
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Invalid JSON format: Root must be an object');
+      }
+
+      final data = decoded;
+
+      // Basic validation
+      if (!data.containsKey('collections') || !data.containsKey('history')) {
+        throw const FormatException(
+          'Invalid backup file: Missing collections or history',
+        );
+      }
+
+      final collectionsJson = data['collections'];
+      final historyJson = data['history'];
+
+      if (collectionsJson is! List || historyJson is! List) {
+        throw const FormatException(
+          'Invalid backup file: collections and history must be lists',
+        );
+      }
+
+      final collections =
+          collectionsJson.map((e) {
+            if (e is! Map<String, dynamic>) {
+              throw const FormatException('Invalid collection data');
+            }
+            return CollectionModel.fromJson(e);
+          }).toList();
+
+      final history =
+          historyJson.map((e) {
+            if (e is! Map<String, dynamic>) {
+              throw const FormatException('Invalid history data');
+            }
+            return HttpRequestModel.fromJson(e);
+          }).toList();
+
+      return {'collections': collections, 'history': history};
+    } on FormatException catch (e) {
+      throw Exception('Format Error: ${e.message}');
+    } catch (e) {
+      throw Exception('Import failed: ${e.toString()}');
+    }
   }
 
   static Future<void> clearCache() async {

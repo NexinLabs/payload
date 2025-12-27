@@ -133,6 +133,11 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     ];
     await _storage.saveCollections(state);
   }
+
+  Future<void> setCollections(List<CollectionModel> collections) async {
+    state = collections;
+    await _storage.saveCollections(state);
+  }
 }
 
 class HistoryNotifier extends StateNotifier<List<HttpRequestModel>> {
@@ -155,6 +160,11 @@ class HistoryNotifier extends StateNotifier<List<HttpRequestModel>> {
 
   Future<void> clearHistory() async {
     state = [];
+    await _storage.saveHistory(state);
+  }
+
+  Future<void> setHistory(List<HttpRequestModel> history) async {
+    state = history;
     await _storage.saveHistory(state);
   }
 }

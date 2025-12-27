@@ -91,6 +91,39 @@ class SettingsScreen extends ConsumerWidget {
             },
           ),
           _buildSettingTile(
+            icon: Icons.file_download_outlined,
+            title: 'Import Data',
+            subtitle: 'Restore collections and history from JSON',
+            onTap: () async {
+              try {
+                final data = await SettingsUtils.importData();
+                if (data != null) {
+                  await ref
+                      .read(collectionsProvider.notifier)
+                      .setCollections(data['collections']);
+                  await ref
+                      .read(historyProvider.notifier)
+                      .setHistory(data['history']);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Data imported successfully')),
+                    );
+                  }
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(e.toString()),
+                      backgroundColor: Colors.redAccent,
+                    ),
+                  );
+                }
+              }
+            },
+          ),
+          _buildSettingTile(
             icon: Icons.delete_outline,
             title: 'Clear Cache',
             subtitle: 'Remove temporary files',

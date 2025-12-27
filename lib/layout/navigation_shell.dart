@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:payload/config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/features/dashboard/dashboard_screen.dart';
 import 'package:payload/features/history/history_screen.dart';
