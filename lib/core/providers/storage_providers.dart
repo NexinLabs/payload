@@ -1,9 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/collection.dart';
 import '../models/http_request.dart';
+import '../models/settings_model.dart';
 import '../services/storage_service.dart';
 
 final storageServiceProvider = Provider((ref) => StorageService());
+
+final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsModel>(
+  (ref) {
+    final storage = ref.watch(storageServiceProvider);
+    return SettingsNotifier(storage);
+  },
+);
 
 final collectionsProvider =
     StateNotifierProvider<CollectionsNotifier, List<CollectionModel>>((ref) {
@@ -18,6 +26,23 @@ final historyProvider =
     });
 
 final selectedCollectionIdProvider = StateProvider<String?>((ref) => null);
+
+class SettingsNotifier extends StateNotifier<SettingsModel> {
+  final StorageService _storage;
+
+  SettingsNotifier(this._storage) : super(SettingsModel()) {
+    _load();
+  }
+
+  Future<void> _load() async {
+    state = await _storage.loadSettings();
+  }
+
+  Future<void> updateSettings(SettingsModel settings) async {
+    state = settings;
+    await _storage.saveSettings(state);
+  }
+}
 
 class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
   final StorageService _storage;

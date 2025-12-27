@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../models/collection.dart';
 import '../models/http_request.dart';
+import '../models/settings_model.dart';
 
 class StorageService {
   static const String _collectionsFile = 'collections.json';
   static const String _historyFile = 'history.json';
+  static const String _settingsFile = 'settings.json';
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -21,6 +23,29 @@ class StorageService {
   Future<File> get _getHistoryFile async {
     final path = await _localPath;
     return File('$path/$_historyFile');
+  }
+
+  Future<File> get _getSettingsFile async {
+    final path = await _localPath;
+    return File('$path/$_settingsFile');
+  }
+
+  Future<SettingsModel> loadSettings() async {
+    try {
+      final file = await _getSettingsFile;
+      if (!await file.exists()) {
+        return SettingsModel();
+      }
+      final contents = await file.readAsString();
+      return SettingsModel.fromJson(json.decode(contents));
+    } catch (e) {
+      return SettingsModel();
+    }
+  }
+
+  Future<void> saveSettings(SettingsModel settings) async {
+    final file = await _getSettingsFile;
+    await file.writeAsString(json.encode(settings.toJson()));
   }
 
   Future<List<CollectionModel>> loadCollections() async {

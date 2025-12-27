@@ -200,11 +200,12 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     });
 
     final request = _getCurrentRequest();
+    final settings = ref.read(settingsProvider);
 
     try {
       final response = await ref
           .read(requestServiceProvider)
-          .sendRequest(request);
+          .sendRequest(request, settings: settings);
 
       if (!mounted) return;
       setState(() {

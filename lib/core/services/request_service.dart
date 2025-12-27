@@ -1,13 +1,39 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/http_request.dart';
+import '../models/settings_model.dart';
 
 class RequestService {
   final Dio _dio = Dio();
 
-  Future<Response> sendRequest(HttpRequestModel request) async {
+  Future<Response> sendRequest(
+    HttpRequestModel request, {
+    SettingsModel? settings,
+  }) async {
     if (request.url.isEmpty) {
       throw Exception('URL cannot be empty');
+    }
+
+    final currentSettings = settings ?? SettingsModel();
+
+    // Configure Dio based on settings
+    _dio.options.connectTimeout = Duration(seconds: currentSettings.timeout);
+    _dio.options.receiveTimeout = Duration(seconds: currentSettings.timeout);
+    _dio.options.followRedirects = currentSettings.followRedirects;
+
+    // SSL Verification
+    if (!currentSettings.sslVerification) {
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = () {
+        final client = HttpClient();
+        client.badCertificateCallback =
+            (X509Certificate cert, String host, int port) => true;
+        return client;
+      };
+    } else {
+      // Reset to default if needed
+      (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = null;
     }
 
     final options = Options(
