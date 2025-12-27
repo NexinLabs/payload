@@ -112,7 +112,11 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       final collections = ref.read(collectionsProvider);
       for (final c in collections) {
         if (c.requests.containsKey(request.id)) {
-          ref.read(selectedCollectionIdProvider.notifier).state = c.id;
+          Future.microtask(() {
+            if (mounted) {
+              ref.read(selectedCollectionIdProvider.notifier).state = c.id;
+            }
+          });
           break;
         }
       }

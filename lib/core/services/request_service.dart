@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/http_request.dart';
 import '../models/settings_model.dart';
+import "../../config.dart";
 
 class RequestService {
   final Dio _dio = Dio();
@@ -50,11 +51,14 @@ class RequestService {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = null;
     }
 
-    final url = _replacePlaceholders(request.url, environments);
+    // final url = _replacePlaceholders(request.url, environments);
+    final url = request.url;
 
     final options = Options(
       method: request.method,
       headers: {
+        // static headers
+        "user-agent": Config.client,
         for (var h in request.headers)
           if (h.enabled && h.key.trim().isNotEmpty)
             h.key.trim(): _replacePlaceholders(h.value, environments),
@@ -64,8 +68,7 @@ class RequestService {
 
     final queryParameters = {
       for (var p in request.params)
-        if (p.enabled && p.key.trim().isNotEmpty)
-          p.key.trim(): _replacePlaceholders(p.value, environments),
+        if (p.enabled && p.key.trim().isNotEmpty) p.key.trim(): p.value,
     };
 
     dynamic data = request.body;

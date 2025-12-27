@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/storage_providers.dart';
 import 'utils/settings_utils.dart';
+import 'package:payload/config.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key});
@@ -108,7 +109,7 @@ class SettingsScreen extends ConsumerWidget {
             child: Column(
               children: [
                 const Text(
-                  'PAYLOAD v1.0.0',
+                  '${Config.appName} v${Config.appVersion}',
                   style: TextStyle(
                     color: Colors.white24,
                     fontSize: 12,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:payload/config.dart';
 import '../../../core/models/http_request.dart';
 import '../../../core/models/collection.dart';
 import '../../../core/providers/storage_providers.dart';
@@ -47,7 +48,7 @@ class RequestSidebar extends ConsumerWidget {
                   const SizedBox(width: 10),
                   const Expanded(
                     child: Text(
-                      'Payload',
+                      Config.appName,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
