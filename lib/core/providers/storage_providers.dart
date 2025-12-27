@@ -102,9 +102,7 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     state = [
       for (final c in state)
         if (c.requests.containsKey(requestId))
-          c.copyWith(
-            requests: Map.from(c.requests)..remove(requestId),
-          )
+          c.copyWith(requests: Map.from(c.requests)..remove(requestId))
         else
           c,
     ];

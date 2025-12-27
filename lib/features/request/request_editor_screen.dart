@@ -81,15 +81,9 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     _bodyController.text = request?.body ?? '';
     _selectedMethod = request?.method ?? 'GET';
     _bodyType = request?.bodyType ?? 'none';
-    _headers = List.from(
-      request?.headers ?? [KeyValue(key: '', value: '')],
-    );
-    _params = List.from(
-      request?.params ?? [KeyValue(key: '', value: '')],
-    );
-    _formData = List.from(
-      request?.formData ?? [KeyValue(key: '', value: '')],
-    );
+    _headers = List.from(request?.headers ?? [KeyValue(key: '', value: '')]);
+    _params = List.from(request?.params ?? [KeyValue(key: '', value: '')]);
+    _formData = List.from(request?.formData ?? [KeyValue(key: '', value: '')]);
     _filePaths = List.from(request?.filePaths ?? []);
     _response = null;
 
