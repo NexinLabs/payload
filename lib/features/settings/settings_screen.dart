@@ -27,9 +27,15 @@ class SettingsScreen extends ConsumerWidget {
           _buildSettingTile(
             icon: Icons.code,
             title: 'Syntax Highlighting',
-            subtitle: 'Enabled',
-            trailing: _buildUpcomingLabel(),
-            enabled: false,
+            subtitle: settings.syntaxHighlighting ? 'Enabled' : 'Disabled',
+            trailing: Switch(
+              value: settings.syntaxHighlighting,
+              onChanged: (val) {
+                ref
+                    .read(settingsProvider.notifier)
+                    .updateSettings(settings.copyWith(syntaxHighlighting: val));
+              },
+            ),
           ),
           const SizedBox(height: 24),
           _buildSectionHeader('Networking'),

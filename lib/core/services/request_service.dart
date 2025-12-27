@@ -8,9 +8,23 @@ import '../models/settings_model.dart';
 class RequestService {
   final Dio _dio = Dio();
 
+  String _replacePlaceholders(String text, List<KeyValue> environments) {
+    var result = text;
+    for (var env in environments) {
+      if (env.enabled && env.key.isNotEmpty) {
+        result = result.replaceAll(
+          '<@${env.key}>',
+          env.value,
+        ); //trigger format : <@KEY_NAME>
+      }
+    }
+    return result;
+  }
+
   Future<Response> sendRequest(
     HttpRequestModel request, {
     SettingsModel? settings,
+    List<KeyValue> environments = const [],
   }) async {
     if (request.url.isEmpty) {
       throw Exception('URL cannot be empty');
@@ -36,25 +50,34 @@ class RequestService {
       (_dio.httpClientAdapter as IOHttpClientAdapter).createHttpClient = null;
     }
 
+    final url = _replacePlaceholders(request.url, environments);
+
     final options = Options(
       method: request.method,
       headers: {
         for (var h in request.headers)
-          if (h.enabled && h.key.trim().isNotEmpty) h.key.trim(): h.value,
+          if (h.enabled && h.key.trim().isNotEmpty)
+            h.key.trim(): _replacePlaceholders(h.value, environments),
       },
       validateStatus: (status) => true,
     );
 
     final queryParameters = {
       for (var p in request.params)
-        if (p.enabled && p.key.trim().isNotEmpty) p.key.trim(): p.value,
+        if (p.enabled && p.key.trim().isNotEmpty)
+          p.key.trim(): _replacePlaceholders(p.value, environments),
     };
 
     dynamic data = request.body;
+    if (data is String) {
+      data = _replacePlaceholders(data, environments);
+    }
+
     if (request.bodyType == 'form-data') {
       data = FormData.fromMap({
         for (var f in request.formData)
-          if (f.enabled && f.key.trim().isNotEmpty) f.key.trim(): f.value,
+          if (f.enabled && f.key.trim().isNotEmpty)
+            f.key.trim(): _replacePlaceholders(f.value, environments),
       });
     } else if (request.bodyType == 'files') {
       data = FormData();
@@ -71,7 +94,7 @@ class RequestService {
 
     final startTime = DateTime.now();
     final response = await _dio.request(
-      request.url,
+      url,
       data: data,
       options: options,
       queryParameters: queryParameters,

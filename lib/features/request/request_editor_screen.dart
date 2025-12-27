@@ -5,11 +5,11 @@ import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
 import 'components/request_sidebar.dart';
 import '../../core/models/http_request.dart';
-import '../../core/models/collection.dart';
-import '../../core/services/request_service.dart';
 import '../../core/providers/storage_providers.dart';
 import '../../core/providers/navigation_provider.dart';
 import '../../core/router/app_router.dart';
+import '../settings/utils/editor_utils.dart';
+import 'utils.dart';
 
 class RequestEditorScreen extends ConsumerStatefulWidget {
   final HttpRequestModel? request;
@@ -170,128 +170,39 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   }
 
   HttpRequestModel _getCurrentRequest() {
-    return HttpRequestModel(
-      id: _requestId,
+    return RequestUtils.getCurrentRequest(
+      requestId: _requestId,
       name: _nameController.text,
       method: _selectedMethod,
       url: _urlController.text,
-      headers: _headers
-          .where((h) => h.key.trim().isNotEmpty)
-          .map((h) => h.copyWith(key: h.key.trim()))
-          .toList(),
-      params: _params
-          .where((p) => p.key.trim().isNotEmpty)
-          .map((p) => p.copyWith(key: p.key.trim()))
-          .toList(),
-      formData: _formData
-          .where((f) => f.key.trim().isNotEmpty)
-          .map((f) => f.copyWith(key: f.key.trim()))
-          .toList(),
+      headers: _headers,
+      params: _params,
+      formData: _formData,
       filePaths: _filePaths,
-      body: _bodyType == 'none' ? null : _bodyController.text,
+      body: _bodyController.text,
       bodyType: _bodyType,
     );
   }
 
   Future<void> _sendRequest() async {
-    setState(() {
-      _isLoading = true;
-      _response = null;
-    });
-
-    final request = _getCurrentRequest();
-    final settings = ref.read(settingsProvider);
-
-    try {
-      final response = await ref
-          .read(requestServiceProvider)
-          .sendRequest(request, settings: settings);
-
-      if (!mounted) return;
-      setState(() {
-        _response = response;
-      });
-
-      // Save to collection if it's a new request or update if it exists
-      final collections = ref.read(collectionsProvider);
-      final selectedId = ref.read(selectedCollectionIdProvider);
-
-      bool exists = false;
-      for (var c in collections) {
-        if (c.requests.containsKey(request.id)) {
-          exists = true;
-          break;
-        }
-      }
-
-      if (exists) {
-        await ref.read(collectionsProvider.notifier).updateRequest(request);
-      } else if (selectedId != null) {
-        await ref
-            .read(collectionsProvider.notifier)
-            .addRequestToCollection(selectedId, request);
-      } else {
-        // Fallback to history if no collection selected (though usually there is one)
-        ref.read(historyProvider.notifier).addToHistory(request);
-      }
-
-      // Open response view
-      if (!mounted) return;
-      AppRouter.push(
-        context,
-        AppRouter.responseView,
-        arguments: ResponseViewArguments(response: response, request: request),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    await RequestUtils.sendRequest(
+      ref: ref,
+      context: context,
+      request: _getCurrentRequest(),
+      onLoadingChanged: (loading) => setState(() => _isLoading = loading),
+      onResponseReceived: (response) => setState(() => _response = response),
+      isMounted: () => mounted,
+    );
   }
 
   Future<void> _saveRequest() async {
-    final request = _getCurrentRequest();
-
-    if (widget.request != null) {
-      await ref.read(collectionsProvider.notifier).updateRequest(request);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Request updated')));
-    } else {
-      final collections = ref.read(collectionsProvider);
-      final selectedId = ref.read(selectedCollectionIdProvider);
-
-      if (collections.isEmpty) {
-        final newColl = CollectionModel(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          name: 'My Requests',
-          requests: {request.id: request},
-        );
-        await ref.read(collectionsProvider.notifier).addCollection(newColl);
-      } else if (selectedId != null) {
-        await ref
-            .read(collectionsProvider.notifier)
-            .addRequestToCollection(selectedId, request);
-      } else {
-        await ref
-            .read(collectionsProvider.notifier)
-            .addRequestToCollection(collections.first.id, request);
-      }
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Request saved')));
-    }
+    await RequestUtils.saveRequest(
+      ref: ref,
+      context: context,
+      request: _getCurrentRequest(),
+      isUpdate: widget.request != null,
+      isMounted: () => mounted,
+    );
   }
 
   @override
@@ -621,6 +532,13 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                   controller: _bodyController,
                   maxLines: null,
                   expands: true,
+                  onChanged: (val) {
+                    EditorUtils.handleAutoClosing(
+                      _bodyController,
+                      val,
+                      ref.read(settingsProvider).syntaxHighlighting,
+                    );
+                  },
                   style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
                   decoration: const InputDecoration(
                     hintText: '{\n  "key": "value"\n}',

@@ -293,7 +293,9 @@ class _MethodChip extends StatelessWidget {
         backgroundColor: Colors.white.withValues(alpha: 0.05),
         selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
         labelStyle: TextStyle(
-          color: isSelected ? Colors.blueAccent : Colors.white.withValues(alpha: 0.5),
+          color: isSelected
+              ? Colors.blueAccent
+              : Colors.white.withValues(alpha: 0.5),
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),

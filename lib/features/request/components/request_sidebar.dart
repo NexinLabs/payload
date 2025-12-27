@@ -45,12 +45,15 @@ class RequestSidebar extends ConsumerWidget {
                 children: [
                   Image.asset('assets/app_logo.png', height: 24),
                   const SizedBox(width: 10),
-                  const Text(
-                    'PAYLOAD',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  const Expanded(
+                    child: Text(
+                      'Payload',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -104,7 +107,9 @@ class RequestSidebar extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: Colors.white.withValues(alpha: 0.05),
                       borderRadius: BorderRadius.circular(4),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
@@ -262,7 +267,7 @@ class RequestSidebar extends ConsumerWidget {
     bool isWrap = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
       child: Row(
         children: [
           GestureDetector(
@@ -276,25 +281,37 @@ class RequestSidebar extends ConsumerWidget {
             ),
           ),
           const SizedBox(width: 4),
-          GestureDetector(
-            onTap: onToggle,
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+          Expanded(
+            child: GestureDetector(
+              onTap: onToggle,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  if (subtitle.isNotEmpty) ...[
+                    const SizedBox(width: 4),
+                    Flexible(
+                      child: Text(
+                        subtitle,
+                        style: const TextStyle(
+                          color: Colors.white54,
+                          fontSize: 14,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
           ),
-          if (subtitle.isNotEmpty) ...[
-            const SizedBox(width: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(color: Colors.white54, fontSize: 14),
-            ),
-          ],
-          const Spacer(),
           if (onWrapToggle != null)
             IconButton(
               icon: Icon(
@@ -305,7 +322,7 @@ class RequestSidebar extends ConsumerWidget {
               onPressed: onWrapToggle,
               tooltip: 'Toggle Wrap Requests',
               constraints: const BoxConstraints(),
-              padding: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
             ),
           if (onSettingsPressed != null)
             IconButton(
@@ -316,14 +333,14 @@ class RequestSidebar extends ConsumerWidget {
               ),
               onPressed: onSettingsPressed,
               constraints: const BoxConstraints(),
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
             ),
           if (onAddPressed != null)
             IconButton(
               icon: const Icon(Icons.add, size: 18, color: Colors.white54),
               onPressed: onAddPressed,
               constraints: const BoxConstraints(),
-              padding: EdgeInsets.zero,
+              padding: const EdgeInsets.symmetric(horizontal: 4),
             ),
         ],
       ),

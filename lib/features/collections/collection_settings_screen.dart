@@ -180,7 +180,7 @@ class _CollectionSettingsScreenState
                   value: item.enabled,
                   onChanged: (val) {
                     setState(() {
-                      _environments[index] = item.copyWith(
+                      _environments[index] = _environments[index].copyWith(
                         enabled: val ?? true,
                       );
                     });
@@ -190,7 +190,9 @@ class _CollectionSettingsScreenState
                   child: TextField(
                     controller: keyController,
                     onChanged: (val) {
-                      _environments[index] = item.copyWith(key: val);
+                      _environments[index] = _environments[index].copyWith(
+                        key: val,
+                      );
                     },
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                     decoration: const InputDecoration(
@@ -204,7 +206,9 @@ class _CollectionSettingsScreenState
                   child: TextField(
                     controller: valueController,
                     onChanged: (val) {
-                      _environments[index] = item.copyWith(value: val);
+                      _environments[index] = _environments[index].copyWith(
+                        value: val,
+                      );
                     },
                     style: const TextStyle(color: Colors.white, fontSize: 14),
                     decoration: const InputDecoration(
