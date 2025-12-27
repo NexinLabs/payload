@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import '../../../core/models/http_request.dart';
 import '../../../core/router/app_router.dart';
+import '../../../core/widgets/json_code_viewer.dart';
 
 class ResponseView extends StatefulWidget {
   final dio.Response? response;
@@ -50,13 +52,13 @@ class _ResponseViewState extends State<ResponseView>
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
             color: isSuccess
-                ? Colors.green.withOpacity(0.1)
-                : Colors.red.withOpacity(0.1),
+                ? Colors.green.withValues(alpha: 0.1)
+                : Colors.red.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(4),
             border: Border.all(
               color: isSuccess
-                  ? Colors.green.withOpacity(0.5)
-                  : Colors.red.withOpacity(0.5),
+                  ? Colors.green.withValues(alpha: 0.5)
+                  : Colors.red.withValues(alpha: 0.5),
             ),
           ),
           child: Row(
@@ -151,7 +153,7 @@ class _ResponseViewState extends State<ResponseView>
           isScrollable: true,
           tabs: const [
             Tab(text: 'Headers'),
-            Tab(text: 'JSON Text'),
+            Tab(text: 'Pretty'),
             Tab(text: 'Raw'),
             Tab(text: 'Preview'),
           ],
@@ -210,6 +212,10 @@ class _ResponseViewState extends State<ResponseView>
     final data = widget.response?.data;
     if (data == null) return const Center(child: Text('No data'));
 
+    final contentType = widget.response?.headers.value('content-type') ?? '';
+    final isJson =
+        contentType.contains('application/json') || data is Map || data is List;
+
     String content = '';
     if (pretty) {
       try {
@@ -228,12 +234,45 @@ class _ResponseViewState extends State<ResponseView>
       content = data.toString();
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: SelectableText(
-        content,
-        style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
-      ),
+    return Stack(
+      children: [
+        if (pretty && isJson)
+          Positioned.fill(child: JsonCodeViewer(json: content))
+        else
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: SelectableText(
+              content,
+              style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            ),
+          ),
+        Positioned(
+          top: 8,
+          right: 8,
+          child: Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.search, size: 20, color: Colors.grey),
+                onPressed: () {
+                  // Search functionality could be added here
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.copy, size: 20, color: Colors.grey),
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: content));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Copied to clipboard'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 

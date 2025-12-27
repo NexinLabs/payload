@@ -126,7 +126,7 @@ class _CollectionSettingsScreenState
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white.withOpacity(0.05),
+              fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide.none,

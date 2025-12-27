@@ -6,8 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:payload/core/router/app_router.dart';
 import 'package:payload/core/providers/navigation_provider.dart';
 import '../../core/providers/storage_providers.dart';
-import '../../core/models/http_request.dart';
-import '../../core/models/collection.dart';
+// import '../../core/models/http_request.dart';
+// import '../../core/models/collection.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -187,9 +187,9 @@ class _RecentRequestItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
+          color: Colors.white.withValues(alpha: 0.05),
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
         ),
         child: Row(
           children: [
@@ -211,7 +211,7 @@ class _RecentRequestItem extends StatelessWidget {
             Text(
               time,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.5),
+                color: Colors.white.withValues(alpha: 0.5),
                 fontSize: 12,
               ),
             ),
@@ -248,7 +248,7 @@ class _MethodBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(4),
       ),
       child: Text(

@@ -83,7 +83,7 @@ class CollectionsScreen extends ConsumerWidget {
                           subtitle: Text(
                             '${collection.requests.length} requests',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.5),
+                              color: Colors.white.withValues(alpha: 0.5),
                               fontSize: 12,
                             ),
                           ),
@@ -290,10 +290,10 @@ class _MethodChip extends StatelessWidget {
         label: Text(label),
         selected: isSelected,
         onSelected: (val) {},
-        backgroundColor: Colors.white.withOpacity(0.05),
-        selectedColor: Colors.blueAccent.withOpacity(0.2),
+        backgroundColor: Colors.white.withValues(alpha: 0.05),
+        selectedColor: Colors.blueAccent.withValues(alpha: 0.2),
         labelStyle: TextStyle(
-          color: isSelected ? Colors.blueAccent : Colors.white.withOpacity(0.5),
+          color: isSelected ? Colors.blueAccent : Colors.white.withValues(alpha: 0.5),
           fontSize: 12,
           fontWeight: FontWeight.bold,
         ),

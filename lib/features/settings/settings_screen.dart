@@ -79,7 +79,7 @@ class SettingsScreen extends StatelessWidget {
                 Text(
                   'Made with ❤️ for developers',
                   style: TextStyle(
-                    color: Colors.white.withOpacity(0.1),
+                    color: Colors.white.withValues(alpha: 0.1),
                     fontSize: 10,
                   ),
                 ),
@@ -117,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Colors.white.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(12),
       ),
       child: ListTile(
@@ -128,7 +128,7 @@ class SettingsScreen extends StatelessWidget {
         ),
         subtitle: Text(
           subtitle,
-          style: TextStyle(fontSize: 12, color: Colors.white.withOpacity(0.4)),
+          style: TextStyle(fontSize: 12, color: Colors.white.withValues(alpha: 0.4)),
         ),
         trailing: trailing,
         onTap: onTap,
