@@ -5,12 +5,14 @@ class CollectionModel {
   final String name;
   final Map<String, HttpRequestModel> requests;
   final List<KeyValue> environments;
+  final bool useCookies;
 
   CollectionModel({
     required this.id,
     required this.name,
     this.requests = const {},
     this.environments = const [],
+    this.useCookies = false,
   });
 
   Map<String, dynamic> toJson() => {
@@ -18,6 +20,7 @@ class CollectionModel {
     'name': name,
     'requests': requests.map((key, value) => MapEntry(key, value.toJson())),
     'environments': environments.map((e) => e.toJson()).toList(),
+    'useCookies': useCookies,
   };
 
   factory CollectionModel.fromJson(Map<String, dynamic> json) {
@@ -48,6 +51,7 @@ class CollectionModel {
               ?.map((e) => KeyValue.fromJson(e))
               .toList() ??
           [],
+      useCookies: json['useCookies'] ?? false,
     );
   }
 
@@ -56,12 +60,14 @@ class CollectionModel {
     String? name,
     Map<String, HttpRequestModel>? requests,
     List<KeyValue>? environments,
+    bool? useCookies,
   }) {
     return CollectionModel(
       id: id ?? this.id,
       name: name ?? this.name,
       requests: requests ?? this.requests,
       environments: environments ?? this.environments,
+      useCookies: useCookies ?? this.useCookies,
     );
   }
 }

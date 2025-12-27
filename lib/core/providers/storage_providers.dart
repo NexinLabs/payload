@@ -74,6 +74,30 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     await _storage.saveCollections(state);
   }
 
+  Future<void> updateCollectionEnvironment(
+    String collectionId,
+    String key,
+    String value,
+  ) async {
+    state = [
+      for (final c in state)
+        if (c.id == collectionId)
+          (() {
+            final envs = List<KeyValue>.from(c.environments);
+            final index = envs.indexWhere((e) => e.key == key);
+            if (index != -1) {
+              envs[index] = envs[index].copyWith(value: value, enabled: true);
+            } else {
+              envs.add(KeyValue(key: key, value: value, enabled: true));
+            }
+            return c.copyWith(environments: envs);
+          })()
+        else
+          c,
+    ];
+    await _storage.saveCollections(state);
+  }
+
   Future<void> deleteCollection(String id) async {
     state = state.where((c) => c.id != id).toList();
     await _storage.saveCollections(state);

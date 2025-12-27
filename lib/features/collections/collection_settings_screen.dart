@@ -21,6 +21,7 @@ class _CollectionSettingsScreenState
     extends ConsumerState<CollectionSettingsScreen> {
   late TextEditingController _nameController;
   late List<KeyValue> _environments;
+  late bool _useCookies;
   final Map<int, TextEditingController> _keyControllers = {};
   final Map<int, TextEditingController> _valueControllers = {};
 
@@ -28,6 +29,7 @@ class _CollectionSettingsScreenState
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.collection.name);
+    _useCookies = widget.collection.useCookies;
     _environments = List.from(
       widget.collection.environments.isEmpty
           ? [KeyValue(key: '', value: '')]
@@ -50,6 +52,7 @@ class _CollectionSettingsScreenState
   Future<void> _save() async {
     final updatedCollection = widget.collection.copyWith(
       name: _nameController.text,
+      useCookies: _useCookies,
       environments: _environments.where((e) => e.key.isNotEmpty).toList(),
     );
     await ref
@@ -66,6 +69,7 @@ class _CollectionSettingsScreenState
     try {
       final currentCollection = widget.collection.copyWith(
         name: _nameController.text,
+        useCookies: _useCookies,
         environments: _environments.where((e) => e.key.isNotEmpty).toList(),
       );
       final jsonString = const JsonEncoder.withIndent(
@@ -136,6 +140,25 @@ class _CollectionSettingsScreenState
                 vertical: 12,
               ),
             ),
+          ),
+          const SizedBox(height: 24),
+          SwitchListTile(
+            title: const Text(
+              'Use Cookies',
+              style: TextStyle(color: Colors.white, fontSize: 14),
+            ),
+            subtitle: const Text(
+              'Automatically handle cookies for this collection',
+              style: TextStyle(color: Colors.white70, fontSize: 12),
+            ),
+            value: _useCookies,
+            onChanged: (val) {
+              setState(() {
+                _useCookies = val;
+              });
+            },
+            activeColor: Theme.of(context).primaryColor,
+            contentPadding: EdgeInsets.zero,
           ),
           const SizedBox(height: 24),
           const Text(
