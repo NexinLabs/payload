@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Collections - API Client</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b6cee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                        "card-dark": "#161b26", 
+                        "input-dark": "#1c2333",
+                        "method-get": "#10b981",
+                        "method-post": "#f59e0b",
+                        "method-put": "#3b82f6",
+                        "method-delete": "#ef4444",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black flex justify-center min-h-screen">
+<!-- Mobile Device Container -->
+<div class="relative flex h-full min-h-screen w-full max-w-[430px] flex-col bg-background-light dark:bg-background-dark overflow-x-hidden font-display shadow-2xl">
+<!-- Status Bar Area (Placeholder for iOS status bar) -->
+<div class="h-12 w-full bg-background-light dark:bg-background-dark shrink-0"></div>
+<!-- Sticky Header -->
+<header class="sticky top-0 z-20 bg-background-light dark:bg-background-dark/95 backdrop-blur-md px-5 py-2 transition-all border-b border-gray-200 dark:border-gray-800/50">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-3">
+<div class="relative cursor-pointer">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 ring-2 ring-primary/20" data-alt="User avatar profile picture" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAJKBvjzercs2f9ZSEYDRN3_9rUm3C-BdUDaVhCNnfOUfG34UxijXAa2_iZvqXFcxOCCgC8nuzI8RKFrq8P4cxZZ7UOQY6twHJCtc73Vs3UcBWwy2rmBOO4E7Yw9BdITHUXz6L6sCAH99N6ztqEVN5_Zngeg8SEl9Ipi9892xEh-Kz3D0LsJaPoC8R3MQdjwWdPjrsh9zfCJ_9FPPzuDr3JIJAO_XbkuP8g20mnTOxgxHpG_JMRTBmaGC-xGCg7mTiHmvszSFmPJhQ");'></div>
+<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-background-dark rounded-full"></div>
+</div>
+<div>
+<h1 class="text-gray-900 dark:text-white text-2xl font-bold leading-tight">Collections</h1>
+<p class="text-xs text-gray-500 dark:text-gray-400 font-medium">Workspace / Mobile Team</p>
+</div>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-primary hover:bg-blue-600 text-white shadow-lg shadow-primary/30 transition-all active:scale-95">
+<span class="material-symbols-outlined text-[24px]">add</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+<span class="material-symbols-outlined text-gray-400 dark:text-gray-500">search</span>
+</div>
+<input class="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-200 rounded-xl bg-white focus:ring-primary focus:border-primary dark:bg-input-dark dark:border-gray-700/50 dark:placeholder-gray-500 dark:text-white dark:focus:ring-primary dark:focus:border-primary shadow-sm transition-all" placeholder="Search requests..." required="" type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-2">
+<button class="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 text-gray-400 dark:text-gray-500 transition-colors">
+<span class="material-symbols-outlined text-[20px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Quick Filters (Chips) -->
+<div class="flex gap-2 mt-4 overflow-x-auto no-scrollbar pb-1 -mx-5 px-5 select-none">
+<button class="flex shrink-0 items-center justify-center h-8 px-4 rounded-full bg-gray-900 dark:bg-white text-white dark:text-black text-xs font-bold shadow-md transition-transform active:scale-95">
+                    All
+                </button>
+<button class="flex shrink-0 items-center justify-center h-8 px-3 gap-1 rounded-full bg-gray-200 dark:bg-card-dark border border-transparent dark:border-gray-700/50 hover:border-method-get/30 transition-all active:scale-95 group">
+<div class="size-2 rounded-full bg-method-get group-hover:shadow-[0_0_8px_rgba(16,185,129,0.6)] transition-shadow"></div>
+<span class="text-gray-600 dark:text-gray-300 text-xs font-semibold">GET</span>
+</button>
+<button class="flex shrink-0 items-center justify-center h-8 px-3 gap-1 rounded-full bg-gray-200 dark:bg-card-dark border border-transparent dark:border-gray-700/50 hover:border-method-post/30 transition-all active:scale-95 group">
+<div class="size-2 rounded-full bg-method-post group-hover:shadow-[0_0_8px_rgba(245,158,11,0.6)] transition-shadow"></div>
+<span class="text-gray-600 dark:text-gray-300 text-xs font-semibold">POST</span>
+</button>
+<button class="flex shrink-0 items-center justify-center h-8 px-3 gap-1 rounded-full bg-gray-200 dark:bg-card-dark border border-transparent dark:border-gray-700/50 hover:border-method-put/30 transition-all active:scale-95 group">
+<div class="size-2 rounded-full bg-method-put group-hover:shadow-[0_0_8px_rgba(59,130,246,0.6)] transition-shadow"></div>
+<span class="text-gray-600 dark:text-gray-300 text-xs font-semibold">PUT</span>
+</button>
+<button class="flex shrink-0 items-center justify-center h-8 px-3 gap-1 rounded-full bg-gray-200 dark:bg-card-dark border border-transparent dark:border-gray-700/50 hover:border-method-delete/30 transition-all active:scale-95 group">
+<div class="size-2 rounded-full bg-method-delete group-hover:shadow-[0_0_8px_rgba(239,68,68,0.6)] transition-shadow"></div>
+<span class="text-gray-600 dark:text-gray-300 text-xs font-semibold">DEL</span>
+</button>
+</div>
+</header>
+<!-- Main Content (Scrollable List) -->
+<main class="flex-1 px-4 py-6 space-y-4 overflow-y-auto">
+<!-- Collection 1: User Auth -->
+<div class="group/collection">
+<details class="group open:pb-2 transition-all" open="">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all select-none shadow-sm sticky top-0 z-10">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-9 rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined text-[20px]">folder_open</span>
+</div>
+<div class="flex flex-col">
+<span class="text-gray-900 dark:text-white text-base font-bold leading-none">User Auth API</span>
+<span class="text-gray-500 dark:text-gray-400 text-xs mt-1 font-medium">4 requests • Production</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<!-- Requests List -->
+<div class="pl-3 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-800 ml-4">
+<!-- Request Item: POST /login -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-post bg-method-post/10 px-2 py-0.5 rounded border border-method-post/20 w-12 text-center shrink-0">POST</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/login</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-green-500"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">200 OK • 120ms</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+<!-- Request Item: GET /profile -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-get bg-method-get/10 px-2 py-0.5 rounded border border-method-get/20 w-12 text-center shrink-0">GET</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/user/profile</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-green-500"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">200 OK • 45ms</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+<!-- Request Item: PUT /update -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-put bg-method-put/10 px-2 py-0.5 rounded border border-method-put/20 w-12 text-center shrink-0">PUT</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/user/update</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-red-500"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">400 Bad Req • 89ms</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+<!-- Request Item: DELETE /account -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-delete bg-method-delete/10 px-2 py-0.5 rounded border border-method-delete/20 w-12 text-center shrink-0">DEL</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/user/account</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-gray-600"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">Not Run</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+</div>
+</details>
+</div>
+<!-- Collection 2: Stripe Payments -->
+<div class="group/collection">
+<details class="group open:pb-2 transition-all">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all select-none shadow-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-9 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400">
+<span class="material-symbols-outlined text-[20px]">payments</span>
+</div>
+<div class="flex flex-col">
+<span class="text-gray-900 dark:text-white text-base font-bold leading-none">Stripe Payments</span>
+<span class="text-gray-500 dark:text-gray-400 text-xs mt-1 font-medium">2 requests • Staging</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<!-- Requests List -->
+<div class="pl-3 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-800 ml-4">
+<!-- Request Item: POST /charge -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-post bg-method-post/10 px-2 py-0.5 rounded border border-method-post/20 w-12 text-center shrink-0">POST</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/charge</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-green-500"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">201 Created • 350ms</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+<!-- Request Item: POST /refund -->
+<div class="relative flex items-center gap-3 p-3 rounded-r-xl hover:bg-gray-100 dark:hover:bg-white/5 cursor-pointer group/item transition-colors">
+<span class="text-[10px] font-bold text-method-post bg-method-post/10 px-2 py-0.5 rounded border border-method-post/20 w-12 text-center shrink-0">POST</span>
+<div class="flex-1 min-w-0">
+<p class="text-gray-900 dark:text-white text-sm font-medium truncate">/refund</p>
+<div class="flex items-center gap-2 mt-0.5">
+<span class="flex size-1.5 rounded-full bg-gray-600"></span>
+<p class="text-gray-500 dark:text-gray-400 text-[11px] font-mono">Not Run</p>
+</div>
+</div>
+<button class="opacity-0 group-hover/item:opacity-100 p-1.5 text-gray-400 hover:text-primary transition-opacity">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+</button>
+</div>
+</div>
+</details>
+</div>
+<!-- Collection 3: Notifications (Closed) -->
+<div class="group/collection">
+<details class="group open:pb-2 transition-all">
+<summary class="flex cursor-pointer items-center justify-between p-4 bg-white dark:bg-card-dark rounded-xl border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all select-none shadow-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center justify-center size-9 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400">
+<span class="material-symbols-outlined text-[20px]">notifications_active</span>
+</div>
+<div class="flex flex-col">
+<span class="text-gray-900 dark:text-white text-base font-bold leading-none">Notifications</span>
+<span class="text-gray-500 dark:text-gray-400 text-xs mt-1 font-medium">8 requests • Dev</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-gray-400 transition-transform duration-300 group-open:rotate-180">expand_more</span>
+</summary>
+<div class="pl-3 mt-2 space-y-1 border-l-2 border-gray-200 dark:border-gray-800 ml-4">
+<!-- Content hidden initially -->
+<div class="p-4 text-center text-sm text-gray-500">No requests loaded</div>
+</div>
+</details>
+</div>
+<!-- Empty State Illustration Placeholder -->
+<div class="pt-8 pb-4 flex flex-col items-center justify-center opacity-40">
+<div class="size-24 rounded-full bg-gradient-to-tr from-gray-800 to-transparent flex items-center justify-center mb-4 border border-white/5">
+<span class="material-symbols-outlined text-gray-600 text-[40px]">post_add</span>
+</div>
+<p class="text-gray-500 text-sm font-medium">End of list</p>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="sticky bottom-0 z-30 bg-white dark:bg-[#111722]/95 backdrop-blur-lg border-t border-gray-200 dark:border-gray-800 pb-5 pt-2">
+<div class="flex justify-around items-center">
+<button class="flex flex-col items-center gap-1 p-2 text-primary">
+<span class="material-symbols-outlined text-[24px] filled">folder</span>
+<span class="text-[10px] font-bold">Collections</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-[24px]">history</span>
+<span class="text-[10px] font-medium">History</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-[24px]">dns</span>
+<span class="text-[10px] font-medium">Env</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-[24px]">settings</span>
+<span class="text-[10px] font-medium">Settings</span>
+</button>
+</div>
+</nav>
+<!-- Bottom Safe Area (Placeholder) -->
+<div class="h-2 w-full bg-white dark:bg-[#111722] shrink-0"></div>
+</div>
+</body></html>

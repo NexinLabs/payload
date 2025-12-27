@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Request Details</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#2b6cee",
+              "background-light": "#f6f6f8",
+              "background-dark": "#101622",
+              "surface-dark": "#161b26",
+              "surface-darker": "#0a0e17",
+            },
+            fontFamily: {
+              "display": ["Space Grotesk", "sans-serif"],
+              "mono": ["JetBrains Mono", "monospace"],
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar for code block */
+        .code-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .code-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .code-scroll::-webkit-scrollbar-thumb {
+            background-color: #324467;
+            border-radius: 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark min-h-screen text-slate-900 dark:text-white font-display overflow-x-hidden selection:bg-primary/30">
+<!-- Top Navigation -->
+<header class="sticky top-0 z-50 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-[#232f48]">
+<div class="flex items-center justify-between px-4 py-3">
+<button class="flex items-center justify-center w-10 h-10 -ml-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<div class="flex flex-col items-center flex-1 mx-2">
+<div class="flex items-center gap-2 max-w-[200px]">
+<span class="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded uppercase tracking-wider">GET</span>
+<h1 class="text-sm font-bold truncate opacity-90">/api/v1/users/me</h1>
+</div>
+</div>
+<button class="flex items-center justify-center w-10 h-10 -mr-2 text-primary hover:text-primary/80 transition-colors" title="Re-run Request">
+<span class="material-symbols-outlined text-2xl">refresh</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex flex-col w-full pb-24">
+<!-- Status Dashboard -->
+<div class="grid grid-cols-3 gap-3 px-4 py-4">
+<!-- Status -->
+<div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-[#232f48] shadow-sm">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></span>
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Status</span>
+</div>
+<p class="text-lg font-bold text-emerald-500">200 OK</p>
+</div>
+<!-- Time -->
+<div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-[#232f48] shadow-sm">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Time</span>
+</div>
+<p class="text-lg font-bold">345ms</p>
+</div>
+<!-- Size -->
+<div class="flex flex-col items-center justify-center p-3 rounded-xl bg-white dark:bg-surface-dark border border-gray-200 dark:border-[#232f48] shadow-sm">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="material-symbols-outlined text-[14px] text-gray-400">data_usage</span>
+<span class="text-xs font-medium text-gray-500 dark:text-gray-400">Size</span>
+</div>
+<p class="text-lg font-bold">1.2 KB</p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="sticky top-[65px] z-40 bg-background-light dark:bg-background-dark pt-2">
+<div class="flex border-b border-gray-200 dark:border-[#232f48] px-4">
+<button class="relative flex-1 pb-3 text-sm font-bold text-primary transition-colors">
+                    Body
+                    <span class="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-t-full"></span>
+</button>
+<button class="flex-1 pb-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                    Headers <span class="ml-1 text-[10px] bg-gray-200 dark:bg-gray-800 px-1.5 py-0.5 rounded-full text-gray-500">8</span>
+</button>
+<button class="flex-1 pb-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors">
+                    Cookies
+                </button>
+</div>
+</div>
+<!-- Tab Content: Body -->
+<div class="px-4 py-4 animate-fade-in">
+<!-- Toolbar: View Switcher & Actions -->
+<div class="flex items-center justify-between mb-4 gap-3">
+<!-- Segmented Control -->
+<div class="flex p-1 bg-gray-200 dark:bg-surface-dark rounded-lg flex-1 max-w-[240px]">
+<button class="flex-1 py-1.5 px-3 text-xs font-bold text-gray-900 dark:text-white bg-white dark:bg-[#2c3b55] rounded shadow-sm transition-all">Pretty</button>
+<button class="flex-1 py-1.5 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Raw</button>
+<button class="flex-1 py-1.5 px-3 text-xs font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Preview</button>
+</div>
+<!-- Utility Actions -->
+<div class="flex gap-2">
+<button class="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-surface-dark text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</button>
+<button class="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-200 dark:bg-surface-dark text-gray-600 dark:text-gray-400 hover:text-primary hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+</div>
+<!-- Code Viewer -->
+<div class="relative w-full overflow-hidden rounded-xl border border-gray-200 dark:border-[#232f48] bg-white dark:bg-surface-darker shadow-inner">
+<div class="absolute top-0 left-0 bottom-0 w-[40px] border-r border-gray-100 dark:border-[#1e2736] bg-gray-50 dark:bg-[#0f141e] flex flex-col items-end pt-4 pb-4 pr-2 select-none pointer-events-none z-10">
+<!-- Line Numbers -->
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">1</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">2</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">3</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">4</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">5</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">6</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">7</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">8</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">9</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">10</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">11</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">12</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">13</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">14</span>
+<span class="text-[11px] leading-[1.6rem] font-mono text-gray-400 opacity-50">15</span>
+</div>
+<div class="w-full overflow-x-auto code-scroll pl-[50px] pr-4 pt-4 pb-4">
+<pre class="font-mono text-[13px] leading-[1.6rem] text-gray-800 dark:text-[#a6accd]"><span class="text-gray-500 dark:text-gray-500">{</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"id"</span>: <span class="text-orange-500 dark:text-[#f78c6c]">10923</span><span class="text-gray-500 dark:text-gray-500">,</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"username"</span>: <span class="text-emerald-600 dark:text-[#c3e88d]">"alex_dev_01"</span><span class="text-gray-500 dark:text-gray-500">,</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"email"</span>: <span class="text-emerald-600 dark:text-[#c3e88d]">"alex@example.com"</span><span class="text-gray-500 dark:text-gray-500">,</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"is_active"</span>: <span class="text-blue-600 dark:text-[#82aaff] font-bold">true</span><span class="text-gray-500 dark:text-gray-500">,</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"roles"</span>: <span class="text-gray-500 dark:text-gray-500">[</span>
+    <span class="text-emerald-600 dark:text-[#c3e88d]">"developer"</span><span class="text-gray-500 dark:text-gray-500">,</span>
+    <span class="text-emerald-600 dark:text-[#c3e88d]">"admin"</span>
+  <span class="text-gray-500 dark:text-gray-500">],</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"preferences"</span>: <span class="text-gray-500 dark:text-gray-500">{</span>
+    <span class="text-purple-600 dark:text-[#c792ea]">"theme"</span>: <span class="text-emerald-600 dark:text-[#c3e88d]">"dark"</span><span class="text-gray-500 dark:text-gray-500">,</span>
+    <span class="text-purple-600 dark:text-[#c792ea]">"notifications"</span>: <span class="text-gray-500 dark:text-gray-500">{</span>
+      <span class="text-purple-600 dark:text-[#c792ea]">"email"</span>: <span class="text-blue-600 dark:text-[#82aaff] font-bold">false</span><span class="text-gray-500 dark:text-gray-500">,</span>
+      <span class="text-purple-600 dark:text-[#c792ea]">"push"</span>: <span class="text-blue-600 dark:text-[#82aaff] font-bold">true</span>
+    <span class="text-gray-500 dark:text-gray-500">}</span>
+  <span class="text-gray-500 dark:text-gray-500">},</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"last_login"</span>: <span class="text-emerald-600 dark:text-[#c3e88d]">"2023-10-27T14:30:00Z"</span><span class="text-gray-500 dark:text-gray-500">,</span>
+  <span class="text-purple-600 dark:text-[#c792ea]">"metadata"</span>: <span class="text-blue-600 dark:text-[#82aaff] italic">null</span>
+<span class="text-gray-500 dark:text-gray-500">}</span></pre>
+</div>
+</div>
+<div class="mt-4 flex justify-center">
+<p class="text-xs text-gray-400 dark:text-gray-600">Line 15, Column 2 • UTF-8 • JSON</p>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar / FAB -->
+<div class="fixed bottom-6 left-0 right-0 px-6 z-50">
+<div class="flex items-center justify-between gap-3 p-2 pl-4 bg-white dark:bg-[#1a2332] rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.5)] border border-gray-100 dark:border-[#2f3b52]">
+<div class="flex items-center gap-2">
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<div class="h-4 w-[1px] bg-gray-200 dark:bg-gray-700"></div>
+<button class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+<span class="material-symbols-outlined text-[20px]">save_alt</span>
+</button>
+</div>
+<button class="flex items-center gap-2 pr-4 pl-3 py-2 bg-primary hover:bg-blue-600 text-white rounded-full transition-all shadow-lg shadow-blue-500/20 active:scale-95">
+<span class="material-symbols-outlined text-[20px]">play_arrow</span>
+<span class="text-sm font-bold tracking-wide">Save Response</span>
+</button>
+</div>
+</div>
+</body></html>

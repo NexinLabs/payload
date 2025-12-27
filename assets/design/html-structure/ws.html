@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WebSocket Client</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b6cee",
+                        "background-light": "#f6f6f8",
+                        "background-dark": "#101622",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "mono": ["JetBrains Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        /* Custom Scrollbar for the log area to keep it sleek */
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-white h-screen flex flex-col overflow-hidden selection:bg-primary/30">
+<!-- Top App Bar -->
+<header class="flex items-center justify-between p-4 pb-2 bg-background-light dark:bg-background-dark shrink-0 z-10">
+<div class="flex items-center gap-3">
+<div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]"></div>
+<h2 class="text-lg font-bold leading-tight tracking-[-0.015em]">WebSocket Client</h2>
+</div>
+<button class="flex items-center justify-center w-10 h-10 rounded-full hover:bg-slate-200 dark:hover:bg-[#192233] transition-colors">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">history</span>
+</button>
+</header>
+<!-- Connection Configuration Area -->
+<div class="px-4 py-2 shrink-0 bg-background-light dark:bg-background-dark">
+<!-- URL Input & Connect Action -->
+<div class="flex flex-col gap-3">
+<div class="flex w-full items-stretch gap-2">
+<!-- Styled Input from Component List -->
+<div class="relative flex-1 group">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-slate-400" style="font-size: 20px;">link</span>
+</div>
+<input class="form-input block w-full rounded-lg border-0 bg-white dark:bg-[#192233] py-3 pl-10 pr-3 text-sm leading-5 placeholder:text-slate-400 focus:ring-1 focus:ring-primary dark:text-white shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-[#324467]" placeholder="wss://echo.websocket.org" value="wss://echo.websocket.org"/>
+</div>
+<!-- Connect/Disconnect Toggle -->
+<button class="flex items-center justify-center px-4 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/50 transition-all active:scale-95">
+<span class="material-symbols-outlined" style="font-size: 24px;">power_settings_new</span>
+</button>
+</div>
+<!-- Chips / Status Info -->
+<div class="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+<div class="flex h-7 shrink-0 items-center justify-center gap-x-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3">
+<span class="material-symbols-outlined text-emerald-500 text-[16px]">check_circle</span>
+<p class="text-emerald-500 text-xs font-medium">Connected</p>
+</div>
+<div class="flex h-7 shrink-0 items-center justify-center gap-x-1.5 rounded-full bg-slate-200 dark:bg-[#232f48] px-3">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-300 text-[16px]">timer</span>
+<p class="text-slate-600 dark:text-slate-300 text-xs font-medium">42ms</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Tabs Navigation -->
+<div class="mt-2 border-b border-slate-200 dark:border-[#324467] px-4 shrink-0 bg-background-light dark:bg-background-dark">
+<div class="flex space-x-6">
+<button class="relative pb-3 text-sm font-medium text-primary">
+                Log
+                <span class="absolute bottom-0 left-0 h-0.5 w-full bg-primary rounded-t-full"></span>
+</button>
+<button class="pb-3 text-sm font-medium text-slate-500 dark:text-[#92a4c9] hover:text-slate-700 dark:hover:text-white transition-colors">
+                Headers <span class="ml-1 text-[10px] py-0.5 px-1.5 rounded-full bg-slate-200 dark:bg-[#192233] text-slate-600 dark:text-slate-400">2</span>
+</button>
+<button class="pb-3 text-sm font-medium text-slate-500 dark:text-[#92a4c9] hover:text-slate-700 dark:hover:text-white transition-colors">
+                Options
+            </button>
+</div>
+</div>
+<!-- Main Content: Message Log (The Terminal) -->
+<main class="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50/50 dark:bg-[#0c1018] relative">
+<!-- Background Pattern/Effect -->
+<div class="absolute inset-0 opacity-[0.03] dark:opacity-[0.05] pointer-events-none" data-alt="Abstract grid pattern for technical background" style="background-image: radial-gradient(#324467 1px, transparent 1px); background-size: 20px 20px;">
+</div>
+<!-- Date Separator -->
+<div class="flex justify-center">
+<span class="text-[10px] font-medium text-slate-400 dark:text-slate-600 bg-slate-200 dark:bg-[#192233] px-2 py-0.5 rounded-full uppercase tracking-wider">Today, 10:23 AM</span>
+</div>
+<!-- System Message -->
+<div class="flex justify-center my-2">
+<p class="text-xs text-slate-400 italic">Connection established with wss://echo.websocket.org</p>
+</div>
+<!-- Message Item: Outgoing -->
+<div class="flex flex-col items-end gap-1 group">
+<div class="max-w-[85%] rounded-2xl rounded-tr-sm bg-primary text-white p-3 shadow-sm relative">
+<div class="flex justify-between items-center mb-1 gap-4 border-b border-white/20 pb-1">
+<span class="text-[10px] font-bold tracking-wider opacity-80 uppercase">Client • Sent</span>
+<span class="text-[10px] opacity-60 font-mono">JSON</span>
+</div>
+<pre class="font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed">{
+  "action": "subscribe",
+  "channel": "ticker"
+}</pre>
+<!-- Status Icon -->
+<div class="absolute -left-6 top-0 text-primary opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<span class="text-[10px] text-slate-400 mr-1">10:23:45</span>
+</div>
+<!-- Message Item: Incoming -->
+<div class="flex flex-col items-start gap-1">
+<div class="max-w-[85%] rounded-2xl rounded-tl-sm bg-white dark:bg-[#192233] border border-slate-200 dark:border-[#324467] p-3 shadow-sm">
+<div class="flex justify-between items-center mb-1 gap-4 border-b border-slate-100 dark:border-[#324467] pb-1">
+<span class="text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">Server • Rcvd</span>
+<span class="text-[10px] text-slate-400 font-mono">JSON</span>
+</div>
+<pre class="font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-300">{
+  "status": "success",
+  "subscription": "ticker",
+  "data": {
+    "price": 42050.50,
+    "vol": 1200
+  }
+}</pre>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">10:23:46</span>
+</div>
+<!-- Message Item: Incoming (Update) -->
+<div class="flex flex-col items-start gap-1">
+<div class="max-w-[85%] rounded-2xl rounded-tl-sm bg-white dark:bg-[#192233] border border-slate-200 dark:border-[#324467] p-3 shadow-sm">
+<div class="flex justify-between items-center mb-1 gap-4 border-b border-slate-100 dark:border-[#324467] pb-1">
+<span class="text-[10px] font-bold tracking-wider text-emerald-600 dark:text-emerald-400 uppercase">Server • Rcvd</span>
+<span class="text-[10px] text-slate-400 font-mono">JSON</span>
+</div>
+<pre class="font-mono text-xs overflow-x-auto whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-300">{
+  "e": "trade",
+  "p": "42055.00",
+  "q": "0.05"
+}</pre>
+</div>
+<span class="text-[10px] text-slate-400 ml-1">10:23:48</span>
+</div>
+<!-- Spacer for bottom bar -->
+<div class="h-2"></div>
+</main>
+<!-- Bottom Action Bar / Payload Input -->
+<div class="shrink-0 bg-background-light dark:bg-background-dark border-t border-slate-200 dark:border-[#324467] p-3 pb-6 sm:pb-3 z-20">
+<div class="flex flex-col gap-2">
+<!-- Format Tools -->
+<div class="flex justify-between px-1">
+<span class="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wide">Payload</span>
+<div class="flex gap-3">
+<button class="text-[10px] font-bold text-primary hover:text-primary/80 uppercase">Prettify</button>
+<button class="text-[10px] font-bold text-slate-500 hover:text-slate-300 uppercase">Clear</button>
+</div>
+</div>
+<!-- Input Area -->
+<div class="flex items-end gap-2">
+<div class="relative flex-1">
+<textarea class="form-textarea w-full rounded-xl border-0 bg-white dark:bg-[#192233] text-slate-900 dark:text-white text-sm font-mono placeholder:text-slate-400 focus:ring-1 focus:ring-primary shadow-sm ring-1 ring-inset ring-slate-200 dark:ring-[#324467] resize-none py-3" placeholder='{"action": "ping"}' rows="1" style="min-height: 48px;"></textarea>
+</div>
+<button class="h-12 w-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-lg shadow-primary/20 flex items-center justify-center transition-all active:scale-95">
+<span class="material-symbols-outlined -ml-0.5 mt-0.5" style="font-size: 24px;">send</span>
+</button>
+</div>
+</div>
+</div>
+</body></html>
