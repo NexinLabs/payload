@@ -32,8 +32,10 @@ class HttpRequestModel {
   final String url;
   final List<KeyValue> headers;
   final List<KeyValue> params;
+  final List<KeyValue> formData;
+  final List<String> filePaths;
   final String? body;
-  final String bodyType; // none, json, text, form-data
+  final String bodyType; // none, json, text, form-data, files
 
   HttpRequestModel({
     required this.id,
@@ -42,6 +44,8 @@ class HttpRequestModel {
     required this.url,
     this.headers = const [],
     this.params = const [],
+    this.formData = const [],
+    this.filePaths = const [],
     this.body,
     this.bodyType = 'none',
   });
@@ -53,6 +57,8 @@ class HttpRequestModel {
     'url': url,
     'headers': headers.map((e) => e.toJson()).toList(),
     'params': params.map((e) => e.toJson()).toList(),
+    'formData': formData.map((e) => e.toJson()).toList(),
+    'filePaths': filePaths,
     'body': body,
     'bodyType': bodyType,
   };
@@ -70,6 +76,12 @@ class HttpRequestModel {
     params:
         (json['params'] as List?)?.map((e) => KeyValue.fromJson(e)).toList() ??
         [],
+    formData:
+        (json['formData'] as List?)
+            ?.map((e) => KeyValue.fromJson(e))
+            .toList() ??
+        [],
+    filePaths: (json['filePaths'] as List?)?.cast<String>() ?? [],
     body: json['body'],
     bodyType: json['bodyType'] ?? 'none',
   );
@@ -81,6 +93,8 @@ class HttpRequestModel {
     String? url,
     List<KeyValue>? headers,
     List<KeyValue>? params,
+    List<KeyValue>? formData,
+    List<String>? filePaths,
     String? body,
     String? bodyType,
   }) {
@@ -91,6 +105,8 @@ class HttpRequestModel {
       url: url ?? this.url,
       headers: headers ?? this.headers,
       params: params ?? this.params,
+      formData: formData ?? this.formData,
+      filePaths: filePaths ?? this.filePaths,
       body: body ?? this.body,
       bodyType: bodyType ?? this.bodyType,
     );

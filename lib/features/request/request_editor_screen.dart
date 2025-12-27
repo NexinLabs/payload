@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart' as dio;
-import 'dart:convert';
-import 'package:flutter_json_view/flutter_json_view.dart';
-import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
+import 'package:file_picker/file_picker.dart';
+import 'components/response_view.dart';
 import '../../core/models/http_request.dart';
 import '../../core/models/collection.dart';
 import '../../core/services/request_service.dart';
@@ -20,6 +19,7 @@ class RequestEditorScreen extends ConsumerStatefulWidget {
 
 class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     with SingleTickerProviderStateMixin {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late TabController _tabController;
   late TextEditingController _urlController;
   late TextEditingController _nameController;
@@ -28,10 +28,14 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   String _bodyType = 'none';
   List<KeyValue> _headers = [];
   List<KeyValue> _params = [];
+  List<KeyValue> _formData = [];
+  List<String> _filePaths = [];
 
   dio.Response? _response;
   bool _isLoading = false;
-  String _responseViewMode = 'Prettier';
+
+  final Map<int, TextEditingController> _keyControllers = {};
+  final Map<int, TextEditingController> _valueControllers = {};
 
   final List<String> _methods = [
     'GET',
@@ -59,6 +63,10 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     _params = List.from(
       widget.request?.params ?? [KeyValue(key: '', value: '')],
     );
+    _formData = List.from(
+      widget.request?.formData ?? [KeyValue(key: '', value: '')],
+    );
+    _filePaths = List.from(widget.request?.filePaths ?? []);
   }
 
   @override
@@ -67,7 +75,30 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     _urlController.dispose();
     _nameController.dispose();
     _bodyController.dispose();
+    for (var controller in _keyControllers.values) {
+      controller.dispose();
+    }
+    for (var controller in _valueControllers.values) {
+      controller.dispose();
+    }
     super.dispose();
+  }
+
+  HttpRequestModel _getCurrentRequest() {
+    return HttpRequestModel(
+      id:
+          widget.request?.id ??
+          DateTime.now().millisecondsSinceEpoch.toString(),
+      name: _nameController.text,
+      method: _selectedMethod,
+      url: _urlController.text,
+      headers: _headers.where((h) => h.key.isNotEmpty).toList(),
+      params: _params.where((p) => p.key.isNotEmpty).toList(),
+      formData: _formData.where((f) => f.key.isNotEmpty).toList(),
+      filePaths: _filePaths,
+      body: _bodyType == 'none' ? null : _bodyController.text,
+      bodyType: _bodyType,
+    );
   }
 
   Future<void> _sendRequest() async {
@@ -76,54 +107,49 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       _response = null;
     });
 
-    final request = HttpRequestModel(
-      id:
-          widget.request?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      name: _nameController.text,
-      method: _selectedMethod,
-      url: _urlController.text,
-      headers: _headers.where((h) => h.key.isNotEmpty).toList(),
-      params: _params.where((p) => p.key.isNotEmpty).toList(),
-      body: _bodyType == 'none' ? null : _bodyController.text,
-      bodyType: _bodyType,
-    );
+    final request = _getCurrentRequest();
 
     try {
       final response = await ref
           .read(requestServiceProvider)
           .sendRequest(request);
+
+      if (!mounted) return;
       setState(() {
         _response = response;
       });
       ref.read(historyProvider.notifier).addToHistory(request);
+
+      // Open response view
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              ResponseView(response: response, request: request),
+        ),
+      );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   Future<void> _saveRequest() async {
-    final request = HttpRequestModel(
-      id:
-          widget.request?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      name: _nameController.text,
-      method: _selectedMethod,
-      url: _urlController.text,
-      headers: _headers.where((h) => h.key.isNotEmpty).toList(),
-      params: _params.where((p) => p.key.isNotEmpty).toList(),
-      body: _bodyType == 'none' ? null : _bodyController.text,
-      bodyType: _bodyType,
-    );
+    final request = _getCurrentRequest();
 
     if (widget.request != null) {
       await ref.read(collectionsProvider.notifier).updateRequest(request);
+
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Request updated')));
@@ -141,6 +167,8 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             .read(collectionsProvider.notifier)
             .addRequestToCollection(collections.first.id, request);
       }
+
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Request saved')));
@@ -150,6 +178,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         title: TextField(
           controller: _nameController,
@@ -160,13 +189,29 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          icon: const Icon(Icons.menu),
+          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
         ),
         actions: [
           IconButton(icon: const Icon(Icons.save), onPressed: _saveRequest),
+          if (_response != null)
+            IconButton(
+              icon: const Icon(Icons.analytics_outlined),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ResponseView(
+                      response: _response,
+                      request: _getCurrentRequest(),
+                    ),
+                  ),
+                );
+              },
+            ),
         ],
       ),
+      drawer: _buildRequestSidebar(),
       body: Column(
         children: [
           Padding(
@@ -268,10 +313,12 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                 _buildKeyValueEditor(
                   _params,
                   (newList) => setState(() => _params = newList),
+                  'params',
                 ),
                 _buildKeyValueEditor(
                   _headers,
                   (newList) => setState(() => _headers = newList),
+                  'headers',
                 ),
                 _buildBodyEditor(),
                 _buildAuthEditor(),
@@ -279,117 +326,15 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
               ],
             ),
           ),
-          if (_response != null) _buildResponseView(),
         ],
       ),
     );
-  }
-
-  Widget _buildResponseView() {
-    final isHtml =
-        _response?.headers.value('content-type')?.contains('text/html') ??
-        false;
-
-    return Container(
-      height: 300,
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.1))),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: Row(
-              children: [
-                Text(
-                  'Status: ${_response?.statusCode}',
-                  style: TextStyle(
-                    color: (_response?.statusCode ?? 0) < 400
-                        ? Colors.green
-                        : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Text(
-                  'Time: ${_response?.extra['responseTime'] ?? 'N/A'}ms',
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-                const Spacer(),
-                _buildViewModeButton('Prettier'),
-                _buildViewModeButton('Raw'),
-                if (isHtml) _buildViewModeButton('Render'),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(child: _buildResponseContent()),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildViewModeButton(String mode) {
-    final isSelected = _responseViewMode == mode;
-    return TextButton(
-      onPressed: () => setState(() => _responseViewMode = mode),
-      style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
-      child: Text(
-        mode,
-        style: TextStyle(
-          color: isSelected ? Colors.blueAccent : Colors.white54,
-          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildResponseContent() {
-    final data = _response?.data;
-    if (data == null) return const Center(child: Text('No data'));
-
-    switch (_responseViewMode) {
-      case 'Prettier':
-        if (data is Map || data is List) {
-          return JsonView.string(json.encode(data));
-        }
-        try {
-          final decoded = json.decode(data.toString());
-          return JsonView.string(json.encode(decoded));
-        } catch (_) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SelectableText(data.toString()),
-          );
-        }
-      case 'Render':
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(8),
-          child: HtmlWidget(
-            data.toString(),
-            textStyle: const TextStyle(color: Colors.white),
-          ),
-        );
-      case 'Raw':
-      default:
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(8),
-          child: SelectableText(
-            data is Map || data is List
-                ? const JsonEncoder.withIndent('  ').convert(data)
-                : data.toString(),
-            style: const TextStyle(fontFamily: 'monospace', fontSize: 12),
-          ),
-        );
-    }
   }
 
   Widget _buildKeyValueEditor(
     List<KeyValue> items,
     Function(List<KeyValue>) onChanged,
+    String type,
   ) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -404,6 +349,26 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             label: const Text('Add Row'),
           );
         }
+
+        final keyId = '$type-key-$index'.hashCode;
+        final valueId = '$type-value-$index'.hashCode;
+
+        final keyController = _keyControllers.putIfAbsent(
+          keyId,
+          () => TextEditingController(text: items[index].key),
+        );
+        final valueController = _valueControllers.putIfAbsent(
+          valueId,
+          () => TextEditingController(text: items[index].value),
+        );
+
+        if (keyController.text != items[index].key) {
+          keyController.text = items[index].key;
+        }
+        if (valueController.text != items[index].value) {
+          valueController.text = items[index].value;
+        }
+
         return Padding(
           padding: const EdgeInsets.only(bottom: 8.0),
           child: Row(
@@ -420,15 +385,12 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
               ),
               Expanded(
                 child: TextField(
+                  controller: keyController,
                   onChanged: (val) {
                     final newList = List<KeyValue>.from(items);
                     newList[index] = newList[index].copyWith(key: val);
                     onChanged(newList);
                   },
-                  controller: TextEditingController(text: items[index].key)
-                    ..selection = TextSelection.collapsed(
-                      offset: items[index].key.length,
-                    ),
                   decoration: const InputDecoration(
                     hintText: 'Key',
                     contentPadding: EdgeInsets.symmetric(
@@ -441,15 +403,12 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
+                  controller: valueController,
                   onChanged: (val) {
                     final newList = List<KeyValue>.from(items);
                     newList[index] = newList[index].copyWith(value: val);
                     onChanged(newList);
                   },
-                  controller: TextEditingController(text: items[index].value)
-                    ..selection = TextSelection.collapsed(
-                      offset: items[index].value.length,
-                    ),
                   decoration: const InputDecoration(
                     hintText: 'Value',
                     contentPadding: EdgeInsets.symmetric(
@@ -468,6 +427,8 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                 onPressed: () {
                   final newList = List<KeyValue>.from(items);
                   newList.removeAt(index);
+                  _keyControllers.remove(keyId)?.dispose();
+                  _valueControllers.remove(valueId)?.dispose();
                   onChanged(newList);
                 },
               ),
@@ -484,16 +445,19 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              _buildBodyTypeChip('none'),
-              _buildBodyTypeChip('json'),
-              _buildBodyTypeChip('form-data'),
-              _buildBodyTypeChip('raw'),
-            ],
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildBodyTypeChip('none'),
+                _buildBodyTypeChip('json'),
+                _buildBodyTypeChip('form-data'),
+                _buildBodyTypeChip('files'),
+              ],
+            ),
           ),
           const SizedBox(height: 16),
-          if (_bodyType != 'none')
+          if (_bodyType == 'json')
             Expanded(
               child: Container(
                 padding: const EdgeInsets.all(12),
@@ -514,6 +478,57 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                     focusedBorder: InputBorder.none,
                   ),
                 ),
+              ),
+            )
+          else if (_bodyType == 'form-data')
+            Expanded(
+              child: _buildKeyValueEditor(
+                _formData,
+                (newList) => setState(() => _formData = newList),
+                'form-data',
+              ),
+            )
+          else if (_bodyType == 'files')
+            Expanded(
+              child: Column(
+                children: [
+                  ElevatedButton.icon(
+                    onPressed: () async {
+                      FilePickerResult? result = await FilePicker.platform
+                          .pickFiles(allowMultiple: true);
+                      if (result != null) {
+                        setState(() {
+                          _filePaths.addAll(result.paths.whereType<String>());
+                        });
+                      }
+                    },
+                    icon: const Icon(Icons.attach_file),
+                    label: const Text('Select Files'),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: _filePaths.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          leading: const Icon(Icons.file_present),
+                          title: Text(_filePaths[index].split('/').last),
+                          trailing: IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _filePaths.removeAt(index);
+                              });
+                            },
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
               ),
             ),
         ],
@@ -560,5 +575,91 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       default:
         return Colors.grey;
     }
+  }
+
+  Widget _buildRequestSidebar() {
+    final collections = ref.watch(collectionsProvider);
+    final history = ref.watch(historyProvider);
+
+    return Drawer(
+      child: Column(
+        children: [
+          const DrawerHeader(
+            child: Center(
+              child: Text(
+                'REQUESTS',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              children: [
+                const ListTile(
+                  title: Text(
+                    'Collections',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ...collections.expand(
+                  (c) => c.requests.map(
+                    (r) => ListTile(
+                      leading: Text(
+                        r.method,
+                        style: TextStyle(
+                          color: _getMethodColor(r.method),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      ),
+                      title: Text(r.name, style: const TextStyle(fontSize: 13)),
+                      onTap: () {
+                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                RequestEditorScreen(request: r),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+                const Divider(),
+                const ListTile(
+                  title: Text(
+                    'History',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                ...history.map(
+                  (r) => ListTile(
+                    leading: Text(
+                      r.method,
+                      style: TextStyle(
+                        color: _getMethodColor(r.method),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 10,
+                      ),
+                    ),
+                    title: Text(r.name, style: const TextStyle(fontSize: 13)),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => RequestEditorScreen(request: r),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

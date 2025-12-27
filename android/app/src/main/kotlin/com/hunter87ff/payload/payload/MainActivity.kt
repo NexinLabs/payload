@@ -1,4 +1,4 @@
-package com.hunter87ff.payload.payload
+package com.nexinlabs.payload
 
 import io.flutter.embedding.android.FlutterActivity
 

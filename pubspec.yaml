@@ -41,6 +41,7 @@ dependencies:
   path_provider: ^2.1.2
   flutter_json_view: ^1.1.5
   flutter_widget_from_html: ^0.16.1
+  file_picker: ^10.3.8
 
 dev_dependencies:
   flutter_test:

@@ -24,10 +24,29 @@ class RequestService {
         if (p.enabled) p.key: p.value,
     };
 
+    dynamic data = request.body;
+    if (request.bodyType == 'form-data') {
+      data = FormData.fromMap({
+        for (var f in request.formData)
+          if (f.enabled) f.key: f.value,
+      });
+    } else if (request.bodyType == 'files') {
+      data = FormData();
+      for (var path in request.filePaths) {
+        final fileName = path.split('/').last;
+        data.files.add(
+          MapEntry(
+            'files',
+            await MultipartFile.fromFile(path, filename: fileName),
+          ),
+        );
+      }
+    }
+
     final startTime = DateTime.now();
     final response = await _dio.request(
       request.url,
-      data: request.body,
+      data: data,
       options: options,
       queryParameters: queryParameters,
     );
