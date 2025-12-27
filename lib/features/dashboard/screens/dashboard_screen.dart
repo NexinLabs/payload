@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/core/widgets/stat_card.dart';
 import 'package:payload/core/widgets/quick_action_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:payload/features/request/screens/request_editor_screen.dart';
 import 'package:payload/features/socket/screens/socket_screen.dart';
+import '../../../core/providers/storage_providers.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final history = ref.watch(historyProvider);
+    final collections = ref.watch(collectionsProvider);
+    final totalRequests = collections.fold(0, (sum, c) => sum + c.requests.length);
+
     return Scaffold(
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -25,22 +31,26 @@ class DashboardScreen extends StatelessWidget {
               ),
             ).animate().fadeIn().slideX(),
             const SizedBox(height: 16),
-            const Row(
+            Row(
               children: [
-                StatCard(
-                  title: 'Requests today',
-                  value: '124',
-                  trend: '+12%',
-                  icon: Icons.bolt,
-                  color: Colors.blueAccent,
+                Expanded(
+                  child: StatCard(
+                    title: 'History',
+                    value: history.length.toString(),
+                    trend: 'Recent',
+                    icon: Icons.history,
+                    color: Colors.blueAccent,
+                  ),
                 ),
-                SizedBox(width: 12),
-                StatCard(
-                  title: 'Success rate',
-                  value: '98.2%',
-                  trend: '+0.5%',
-                  icon: Icons.check_circle_outline,
-                  color: Colors.greenAccent,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: StatCard(
+                    title: 'Saved Requests',
+                    value: totalRequests.toString(),
+                    trend: '${collections.length} Colls',
+                    icon: Icons.folder_special,
+                    color: Colors.greenAccent,
+                  ),
                 ),
               ],
             ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.1),
@@ -121,14 +131,23 @@ class DashboardScreen extends StatelessWidget {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: 5,
+              itemCount: history.length > 5 ? 5 : history.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
+                final request = history[index];
                 return _RecentRequestItem(
-                  method: index % 2 == 0 ? 'GET' : 'POST',
-                  path: '/api/v1/users${index > 0 ? '/$index' : ''}',
+                  method: request.method,
+                  path: request.url,
                   statusCode: 200,
-                  time: '124ms',
+                  time: 'N/A',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RequestEditorScreen(request: request),
+                      ),
+                    );
+                  },
                 );
               },
             ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.1),
@@ -144,85 +163,86 @@ class _RecentRequestItem extends StatelessWidget {
   final String path;
   final int statusCode;
   final String time;
+  final VoidCallback? onTap;
 
   const _RecentRequestItem({
     required this.method,
     required this.path,
     required this.statusCode,
     required this.time,
+    this.onTap,
   });
-
-  Color _getMethodColor(String method) {
-    switch (method) {
-      case 'GET':
-        return Colors.green;
-      case 'POST':
-        return Colors.blue;
-      case 'PUT':
-        return Colors.orange;
-      case 'DELETE':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardTheme.color,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _getMethodColor(method).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(4),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        child: Row(
+          children: [
+            _MethodBadge(method: method),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                path,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            child: Text(
-              method,
+            const SizedBox(width: 12),
+            Text(
+              time,
               style: TextStyle(
-                color: _getMethodColor(method),
-                fontWeight: FontWeight.bold,
-                fontSize: 10,
+                color: Colors.white.withOpacity(0.5),
+                fontSize: 12,
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              path,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Text(
-            time,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.4),
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 8,
-            height: 8,
-            decoration: const BoxDecoration(
-              color: Colors.green,
-              shape: BoxShape.circle,
-            ),
-          ),
-        ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MethodBadge extends StatelessWidget {
+  final String method;
+  const _MethodBadge({required this.method});
+
+  @override
+  Widget build(BuildContext context) {
+    Color color;
+    switch (method) {
+      case 'GET': color = Colors.green; break;
+      case 'POST': color = Colors.blue; break;
+      case 'PUT': color = Colors.orange; break;
+      case 'DELETE': color = Colors.red; break;
+      default: color = Colors.grey;
+    }
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Text(
+        method,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

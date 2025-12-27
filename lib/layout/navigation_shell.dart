@@ -3,6 +3,7 @@ import 'package:payload/features/dashboard/screens/dashboard_screen.dart';
 import 'package:payload/features/history/screens/history_screen.dart';
 import 'package:payload/features/collections/screens/collections_screen.dart';
 import 'package:payload/features/settings/screens/settings_screen.dart';
+import 'package:payload/features/request/screens/request_editor_screen.dart';
 
 class NavigationShell extends StatefulWidget {
   const NavigationShell({super.key});
@@ -40,20 +41,17 @@ class _NavigationShellState extends State<NavigationShell> {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            icon: const Icon(Icons.add),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const RequestEditorScreen(),
+                ),
+              );
+            },
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 12.0),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: Colors.blueAccent,
-              child: Text(
-                'H',
-                style: TextStyle(fontSize: 12, color: Colors.white),
-              ),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
       drawer: const AppDrawer(),

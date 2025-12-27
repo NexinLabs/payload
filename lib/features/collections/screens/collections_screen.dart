@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/providers/storage_providers.dart';
+import '../../../core/models/collection.dart';
+import '../../../core/models/http_request.dart';
+import '../../request/screens/request_editor_screen.dart';
 
-class CollectionsScreen extends StatelessWidget {
+class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final collections = ref.watch(collectionsProvider);
+
     return Scaffold(
       body: Column(
         children: [
@@ -21,9 +28,9 @@ class CollectionsScreen extends StatelessWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
+          const SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
+            padding: EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 _MethodChip(label: 'ALL', isSelected: true),
@@ -36,48 +43,97 @@ class CollectionsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: ListView.builder(
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return ExpansionTile(
-                  leading: const Icon(Icons.folder_open, color: Colors.amber),
-                  title: Text(
-                    'Project Alpha ${index + 1}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+            child: collections.isEmpty
+                ? const Center(child: Text('No collections found'))
+                : ListView.builder(
+                    itemCount: collections.length,
+                    itemBuilder: (context, index) {
+                      final collection = collections[index];
+                      return ExpansionTile(
+                        leading: const Icon(
+                          Icons.folder_open,
+                          color: Colors.amber,
+                        ),
+                        title: Text(
+                          collection.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(
+                          '${collection.requests.length} requests',
+                          style: TextStyle(
+                            color: Colors.white.withOpacity(0.5),
+                            fontSize: 12,
+                          ),
+                        ),
+                        children: collection.requests.map((request) {
+                          return ListTile(
+                            contentPadding: const EdgeInsets.only(
+                              left: 32,
+                              right: 16,
+                            ),
+                            leading: _MethodIndicator(method: request.method),
+                            title: Text(
+                              request.name,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                            trailing: const Icon(Icons.more_vert, size: 18),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      RequestEditorScreen(request: request),
+                                ),
+                              );
+                            },
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
-                  subtitle: Text(
-                    '${(index + 1) * 4} requests',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      fontSize: 12,
-                    ),
-                  ),
-                  children: List.generate(4, (reqIndex) {
-                    return ListTile(
-                      contentPadding: const EdgeInsets.only(
-                        left: 32,
-                        right: 16,
-                      ),
-                      leading: _MethodIndicator(
-                        method: reqIndex % 2 == 0 ? 'GET' : 'POST',
-                      ),
-                      title: Text(
-                        'Request ${reqIndex + 1}',
-                        style: const TextStyle(fontSize: 14),
-                      ),
-                      trailing: const Icon(Icons.more_vert, size: 18),
-                      onTap: () {},
-                    );
-                  }),
-                );
-              },
-            ),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () => _showAddCollectionDialog(context, ref),
         child: const Icon(Icons.create_new_folder_outlined),
+      ),
+    );
+  }
+
+  void _showAddCollectionDialog(BuildContext context, WidgetRef ref) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('New Collection'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(hintText: 'Collection Name'),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.isNotEmpty) {
+                ref
+                    .read(collectionsProvider.notifier)
+                    .addCollection(
+                      CollectionModel(
+                        id: DateTime.now().millisecondsSinceEpoch.toString(),
+                        name: controller.text,
+                      ),
+                    );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Create'),
+          ),
+        ],
       ),
     );
   }
