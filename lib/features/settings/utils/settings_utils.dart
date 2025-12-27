@@ -40,7 +40,9 @@ class SettingsUtils {
       final dynamic decoded = json.decode(jsonString);
 
       if (decoded is! Map<String, dynamic>) {
-        throw const FormatException('Invalid JSON format: Root must be an object');
+        throw const FormatException(
+          'Invalid JSON format: Root must be an object',
+        );
       }
 
       final data = decoded;
@@ -61,21 +63,19 @@ class SettingsUtils {
         );
       }
 
-      final collections =
-          collectionsJson.map((e) {
-            if (e is! Map<String, dynamic>) {
-              throw const FormatException('Invalid collection data');
-            }
-            return CollectionModel.fromJson(e);
-          }).toList();
+      final collections = collectionsJson.map((e) {
+        if (e is! Map<String, dynamic>) {
+          throw const FormatException('Invalid collection data');
+        }
+        return CollectionModel.fromJson(e);
+      }).toList();
 
-      final history =
-          historyJson.map((e) {
-            if (e is! Map<String, dynamic>) {
-              throw const FormatException('Invalid history data');
-            }
-            return HttpRequestModel.fromJson(e);
-          }).toList();
+      final history = historyJson.map((e) {
+        if (e is! Map<String, dynamic>) {
+          throw const FormatException('Invalid history data');
+        }
+        return HttpRequestModel.fromJson(e);
+      }).toList();
 
       return {'collections': collections, 'history': history};
     } on FormatException catch (e) {

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../core/providers/storage_providers.dart';
 import 'utils/settings_utils.dart';
 import 'package:payload/config.dart';
@@ -107,7 +108,9 @@ class SettingsScreen extends ConsumerWidget {
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Data imported successfully')),
+                      const SnackBar(
+                        content: Text('Data imported successfully'),
+                      ),
                     );
                   }
                 }
@@ -157,10 +160,50 @@ class SettingsScreen extends ConsumerWidget {
                     fontSize: 10,
                   ),
                 ),
+                const SizedBox(height: 20),
+                const Text(
+                  'DEVELOPED BY',
+                  style: TextStyle(
+                    color: Colors.white10,
+                    fontSize: 8,
+                    letterSpacing: 1.2,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildCreditLink('hunter87ff', Config.devGithubUrl),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text('|', style: TextStyle(color: Colors.white10)),
+                    ),
+                    _buildCreditLink('Nexin Labs', Config.orgGithubUrl),
+                  ],
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCreditLink(String label, String url) {
+    return InkWell(
+      onTap: () => launchUrl(Uri.parse(url)),
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white38,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ),
     );
   }
