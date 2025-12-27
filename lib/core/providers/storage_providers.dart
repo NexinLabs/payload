@@ -17,10 +17,7 @@ final historyProvider =
       return HistoryNotifier(storage);
     });
 
-final selectedCollectionIdProvider = StateProvider<String?>((ref) {
-  final collections = ref.watch(collectionsProvider);
-  return collections.isNotEmpty ? collections.first.id : null;
-});
+final selectedCollectionIdProvider = StateProvider<String?>((ref) => null);
 
 class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
   final StorageService _storage;
@@ -36,6 +33,12 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
   Future<void> addCollection(CollectionModel collection) async {
     state = [...state, collection];
     await _storage.saveCollections(state);
+    if (collection.requests.isNotEmpty) {
+      await _storage.saveRequestToFileSystem(
+        collection,
+        collection.requests.last,
+      );
+    }
   }
 
   Future<void> updateCollection(CollectionModel collection) async {
@@ -55,27 +58,46 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     String collectionId,
     HttpRequestModel request,
   ) async {
+    CollectionModel? updatedCollection;
     state = [
       for (final c in state)
         if (c.id == collectionId)
-          c.copyWith(requests: [...c.requests, request])
+          (() {
+            updatedCollection = c.copyWith(requests: [...c.requests, request]);
+            return updatedCollection!;
+          })()
         else
           c,
     ];
     await _storage.saveCollections(state);
+    if (updatedCollection != null) {
+      await _storage.saveRequestToFileSystem(updatedCollection!, request);
+    }
   }
 
   Future<void> updateRequest(HttpRequestModel request) async {
+    CollectionModel? updatedCollection;
     state = [
       for (final c in state)
-        c.copyWith(
-          requests: [
-            for (final r in c.requests)
-              if (r.id == request.id) request else r,
-          ],
-        ),
+        (() {
+          final hasRequest = c.requests.any((r) => r.id == request.id);
+          if (hasRequest) {
+            final newColl = c.copyWith(
+              requests: [
+                for (final r in c.requests)
+                  if (r.id == request.id) request else r,
+              ],
+            );
+            updatedCollection = newColl;
+            return newColl;
+          }
+          return c;
+        })(),
     ];
     await _storage.saveCollections(state);
+    if (updatedCollection != null) {
+      await _storage.saveRequestToFileSystem(updatedCollection!, request);
+    }
   }
 }
 

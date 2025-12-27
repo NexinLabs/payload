@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
 import 'components/response_view.dart';
@@ -8,6 +9,8 @@ import '../../core/models/http_request.dart';
 import '../../core/models/collection.dart';
 import '../../core/services/request_service.dart';
 import '../../core/providers/storage_providers.dart';
+import '../../core/providers/navigation_provider.dart';
+import '../../core/router/app_router.dart';
 
 class RequestEditorScreen extends ConsumerStatefulWidget {
   final HttpRequestModel? request;
@@ -75,6 +78,18 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     _filePaths = List.from(widget.request?.filePaths ?? []);
 
     _urlController.addListener(_onUrlChanged);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.request != null) {
+        final collections = ref.read(collectionsProvider);
+        for (final c in collections) {
+          if (c.requests.any((r) => r.id == widget.request!.id)) {
+            ref.read(selectedCollectionIdProvider.notifier).state = c.id;
+            break;
+          }
+        }
+      }
+    });
   }
 
   void _onUrlChanged() {
@@ -185,12 +200,10 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
       // Open response view
       if (!mounted) return;
-      Navigator.push(
+      AppRouter.push(
         context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ResponseView(response: response, request: request),
-        ),
+        AppRouter.responseView,
+        arguments: ResponseViewArguments(response: response, request: request),
       );
     } catch (e) {
       if (!mounted) return;
@@ -267,13 +280,12 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             IconButton(
               icon: const Icon(Icons.analytics_outlined),
               onPressed: () {
-                Navigator.push(
+                AppRouter.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => ResponseView(
-                      response: _response,
-                      request: _getCurrentRequest(),
-                    ),
+                  AppRouter.responseView,
+                  arguments: ResponseViewArguments(
+                    response: _response,
+                    request: _getCurrentRequest(),
                   ),
                 );
               },
@@ -393,6 +405,36 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                 _buildSettingsEditor(),
               ],
             ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0,
+        onTap: (index) {
+          ref.read(navigationIndexProvider.notifier).state = index;
+          context.go(AppRouter.root);
+        },
+        type: BottomNavigationBarType.fixed,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.dashboard_outlined),
+            activeIcon: Icon(Icons.dashboard),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history_outlined),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.folder_outlined),
+            activeIcon: Icon(Icons.folder),
+            label: 'Collections',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_outlined),
+            activeIcon: Icon(Icons.settings),
+            label: 'Settings',
           ),
         ],
       ),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/core/theme/app_theme.dart';
-import 'package:payload/layout/navigation_shell.dart';
+import 'package:payload/core/router/app_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,11 +13,11 @@ class PayloadApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Payload',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const NavigationShell(),
+      routerConfig: AppRouter.router,
     );
   }
 }

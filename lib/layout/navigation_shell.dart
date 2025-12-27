@@ -1,36 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/features/dashboard/dashboard_screen.dart';
 import 'package:payload/features/history/history_screen.dart';
 import 'package:payload/features/collections/collections_screen.dart';
 import 'package:payload/features/settings/settings_screen.dart';
-import 'package:payload/features/request/request_editor_screen.dart';
+import 'package:payload/core/router/app_router.dart';
 import 'package:payload/features/request/components/request_sidebar.dart';
+import 'package:payload/core/providers/navigation_provider.dart';
 
-class NavigationShell extends StatefulWidget {
+class NavigationShell extends ConsumerWidget {
   const NavigationShell({super.key});
 
-  @override
-  State<NavigationShell> createState() => _NavigationShellState();
-}
-
-class _NavigationShellState extends State<NavigationShell> {
-  int _selectedIndex = 0;
-
-  final List<Widget> _screens = [
-    const DashboardScreen(),
-    const HistoryScreen(),
-    const CollectionsScreen(),
-    const SettingsScreen(),
+  final List<Widget> _screens = const [
+    DashboardScreen(),
+    HistoryScreen(),
+    CollectionsScreen(),
+    SettingsScreen(),
   ];
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final selectedIndex = ref.watch(navigationIndexProvider);
+
     return Scaffold(
       appBar: AppBar(
         title: Row(
@@ -44,22 +35,20 @@ class _NavigationShellState extends State<NavigationShell> {
           IconButton(
             icon: const Icon(Icons.add),
             onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const RequestEditorScreen(),
-                ),
-              );
+              AppRouter.push(context, AppRouter.requestEditor);
             },
           ),
           const SizedBox(width: 8),
         ],
       ),
       drawer: const RequestSidebar(),
-      body: IndexedStack(index: _selectedIndex, children: _screens),
+      body: IndexedStack(index: selectedIndex, children: _screens),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
+        currentIndex: selectedIndex,
+        onTap: (index) {
+          ref.read(navigationIndexProvider.notifier).state = index;
+        },
+        type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),

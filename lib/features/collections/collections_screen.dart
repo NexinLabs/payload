@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/providers/storage_providers.dart';
 import '../../core/models/collection.dart';
-import '../request/request_editor_screen.dart';
+import '../../core/router/app_router.dart';
 
 class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
@@ -77,12 +77,10 @@ class CollectionsScreen extends ConsumerWidget {
                             ),
                             trailing: const Icon(Icons.more_vert, size: 18),
                             onTap: () {
-                              Navigator.push(
+                              AppRouter.push(
                                 context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      RequestEditorScreen(request: request),
-                                ),
+                                AppRouter.requestEditor,
+                                arguments: request,
                               );
                             },
                           );
@@ -113,7 +111,7 @@ class CollectionsScreen extends ConsumerWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => AppRouter.pop(context),
             child: const Text('Cancel'),
           ),
           TextButton(
@@ -127,7 +125,7 @@ class CollectionsScreen extends ConsumerWidget {
                         name: controller.text,
                       ),
                     );
-                Navigator.pop(context);
+                AppRouter.pop(context);
               }
             },
             child: const Text('Create'),

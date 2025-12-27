@@ -63,6 +63,41 @@ class StorageService {
     await file.writeAsString(jsonString);
   }
 
+  Future<void> saveRequestToFileSystem(
+    CollectionModel collection,
+    HttpRequestModel request,
+  ) async {
+    if (!Platform.isAndroid) return;
+
+    try {
+      final directory = await getExternalStorageDirectory();
+      if (directory == null) return;
+
+      // getExternalStorageDirectory() returns Android/data/<packagename>/files
+      // We go up one level to get to Android/data/<packagename>/
+      final baseDir = directory.parent.path;
+      final collectionsDir = Directory(
+        '$baseDir/collections/${collection.name.replaceAll(RegExp(r'[^\w\s-]'), '_')}',
+      );
+
+      if (!await collectionsDir.exists()) {
+        await collectionsDir.create(recursive: true);
+      }
+
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final fileName = 'request-save-$timestamp.json';
+      final file = File('${collectionsDir.path}/$fileName');
+
+      final jsonString = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(request.toJson());
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error saving to file system: $e');
+    }
+  }
+
   List<CollectionModel> _getInitialCollections() {
     return [
       CollectionModel(

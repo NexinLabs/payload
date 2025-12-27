@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/http_request.dart';
 import '../../../core/providers/storage_providers.dart';
+import '../../../core/router/app_router.dart';
 import '../request_editor_screen.dart';
 
 class RequestSidebar extends ConsumerWidget {
@@ -103,13 +104,8 @@ class RequestSidebar extends ConsumerWidget {
               context,
               title: 'Requests',
               onAddPressed: () {
-                Navigator.pop(context);
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const RequestEditorScreen(),
-                  ),
-                );
+                AppRouter.pop(context);
+                AppRouter.replace(context, AppRouter.requestEditor);
               },
             ),
             Expanded(
@@ -232,13 +228,8 @@ class RequestSidebar extends ConsumerWidget {
         ],
       ),
       onTap: () {
-        Navigator.pop(context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => RequestEditorScreen(request: r),
-          ),
-        );
+        AppRouter.pop(context);
+        AppRouter.replace(context, AppRouter.requestEditor, arguments: r);
       },
     );
   }

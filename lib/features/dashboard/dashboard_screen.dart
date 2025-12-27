@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/core/widgets/stat_card.dart';
 import 'package:payload/core/widgets/quick_action_button.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:payload/features/request/request_editor_screen.dart';
-import 'package:payload/features/socket/socket_screen.dart';
+import 'package:payload/core/router/app_router.dart';
+import 'package:payload/core/providers/navigation_provider.dart';
 import '../../core/providers/storage_providers.dart';
 
 class DashboardScreen extends ConsumerWidget {
@@ -43,6 +43,9 @@ class DashboardScreen extends ConsumerWidget {
                     trend: 'Recent',
                     icon: Icons.history,
                     color: Colors.blueAccent,
+                    onTap: () {
+                      ref.read(navigationIndexProvider.notifier).state = 1;
+                    },
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -53,6 +56,9 @@ class DashboardScreen extends ConsumerWidget {
                     trend: '${collections.length} Colls',
                     icon: Icons.folder_special,
                     color: Colors.greenAccent,
+                    onTap: () {
+                      ref.read(navigationIndexProvider.notifier).state = 2;
+                    },
                   ),
                 ),
               ],
@@ -80,12 +86,7 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.http,
                   color: Colors.blue,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RequestEditorScreen(),
-                      ),
-                    );
+                    AppRouter.push(context, AppRouter.requestEditor);
                   },
                 ),
                 QuickActionButton(
@@ -93,12 +94,7 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.sync_alt,
                   color: Colors.purple,
                   onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const WebSocketScreen(),
-                      ),
-                    );
+                    AppRouter.push(context, AppRouter.socket);
                   },
                 ),
                 QuickActionButton(
@@ -127,7 +123,12 @@ class DashboardScreen extends ConsumerWidget {
                     color: Colors.white,
                   ),
                 ),
-                TextButton(onPressed: () {}, child: const Text('View All')),
+                TextButton(
+                  onPressed: () {
+                    ref.read(navigationIndexProvider.notifier).state = 1;
+                  },
+                  child: const Text('View All'),
+                ),
               ],
             ),
             const SizedBox(height: 8),
@@ -144,12 +145,10 @@ class DashboardScreen extends ConsumerWidget {
                   statusCode: 200,
                   time: 'N/A',
                   onTap: () {
-                    Navigator.push(
+                    AppRouter.push(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            RequestEditorScreen(request: request),
-                      ),
+                      AppRouter.requestEditor,
+                      arguments: request,
                     );
                   },
                 );

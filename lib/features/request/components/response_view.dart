@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import '../../../core/models/http_request.dart';
+import '../../../core/router/app_router.dart';
 
 class ResponseView extends StatefulWidget {
   final dio.Response? response;
@@ -99,7 +100,7 @@ class _ResponseViewState extends State<ResponseView>
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => AppRouter.pop(context),
           ),
         ],
       ),
