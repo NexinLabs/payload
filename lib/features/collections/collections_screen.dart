@@ -104,6 +104,9 @@ class CollectionsScreen extends ConsumerWidget {
                                     _showRequestOptions(context, ref, request),
                               ),
                               onTap: () {
+                                ref
+                                    .read(historyProvider.notifier)
+                                    .addToHistory(request);
                                 AppRouter.push(
                                   context,
                                   AppRouter.requestEditor,

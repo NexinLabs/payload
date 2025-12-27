@@ -7,6 +7,8 @@ import '../../../core/router/app_router.dart';
 
 final isRequestsExpandedProvider = StateProvider<bool>((ref) => true);
 final isWrapRequestsProvider = StateProvider<bool>((ref) => false);
+final isCollectionsExpandedProvider = StateProvider<bool>((ref) => true);
+final isWrapCollectionsProvider = StateProvider<bool>((ref) => false);
 
 class RequestSidebar extends ConsumerWidget {
   const RequestSidebar({super.key});
@@ -18,6 +20,8 @@ class RequestSidebar extends ConsumerWidget {
     final history = ref.watch(historyProvider);
     final isExpanded = ref.watch(isRequestsExpandedProvider);
     final isWrap = ref.watch(isWrapRequestsProvider);
+    final isCollectionsExpanded = ref.watch(isCollectionsExpandedProvider);
+    final isWrapCollections = ref.watch(isWrapCollectionsProvider);
 
     String subtitle = '';
     CollectionModel? selectedCollection;
@@ -58,6 +62,16 @@ class RequestSidebar extends ConsumerWidget {
               context,
               title: 'Collections',
               subtitle: subtitle,
+              isExpanded: isCollectionsExpanded,
+              isWrap: isWrapCollections,
+              onToggle: () {
+                ref.read(isCollectionsExpandedProvider.notifier).state =
+                    !isCollectionsExpanded;
+              },
+              onWrapToggle: () {
+                ref.read(isWrapCollectionsProvider.notifier).state =
+                    !isWrapCollections;
+              },
               onSettingsPressed: () {
                 if (selectedCollection != null) {
                   AppRouter.pop(context);
@@ -73,58 +87,62 @@ class RequestSidebar extends ConsumerWidget {
                 }
               },
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 16.0,
-                vertical: 8.0,
-              ),
-              child: GestureDetector(
-                onLongPress: () {
-                  if (selectedCollection != null) {
-                    _showCollectionOptions(context, ref, selectedCollection);
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.white.withOpacity(0.1)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: selectedCollectionId,
-                      isExpanded: true,
-                      dropdownColor: const Color(0xFF2D2D2D),
-                      items: collections.map((c) {
-                        return DropdownMenuItem(
-                          value: c.id,
-                          child: Text(
-                            c.name,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 14,
+            if (isCollectionsExpanded)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
+                child: GestureDetector(
+                  onLongPress: () {
+                    if (selectedCollection != null) {
+                      _showCollectionOptions(context, ref, selectedCollection);
+                    }
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(4),
+                      border: Border.all(color: Colors.white.withOpacity(0.1)),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: selectedCollectionId,
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF2D2D2D),
+                        items: collections.map((c) {
+                          return DropdownMenuItem(
+                            value: c.id,
+                            child: Text(
+                              c.name,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14,
+                                overflow: isWrapCollections
+                                    ? TextOverflow.visible
+                                    : TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          ref
-                                  .read(selectedCollectionIdProvider.notifier)
-                                  .state =
-                              val;
-                        }
-                      },
-                      hint: const Text(
-                        'Select Collection',
-                        style: TextStyle(color: Colors.white54),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            ref
+                                    .read(selectedCollectionIdProvider.notifier)
+                                    .state =
+                                val;
+                          }
+                        },
+                        hint: const Text(
+                          'Select Collection',
+                          style: TextStyle(color: Colors.white54),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
 
             const SizedBox(height: 16),
 
@@ -352,6 +370,7 @@ class RequestSidebar extends ConsumerWidget {
         ],
       ),
       onTap: () {
+        ref.read(historyProvider.notifier).addToHistory(r);
         AppRouter.pop(context);
         AppRouter.replace(context, AppRouter.requestEditor, arguments: r);
       },

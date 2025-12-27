@@ -6,6 +6,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:payload/core/router/app_router.dart';
 import 'package:payload/core/providers/navigation_provider.dart';
 import '../../core/providers/storage_providers.dart';
+import '../../core/models/http_request.dart';
+import '../../core/models/collection.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -14,6 +16,7 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(historyProvider);
     final collections = ref.watch(collectionsProvider);
+
     final totalRequests = collections.fold(
       0,
       (sum, c) => sum + c.requests.length,
@@ -135,7 +138,7 @@ class DashboardScreen extends ConsumerWidget {
             ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              itemCount: history.length > 5 ? 5 : history.length,
+              itemCount: history.length > 6 ? 6 : history.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final request = history[index];
@@ -143,7 +146,7 @@ class DashboardScreen extends ConsumerWidget {
                   method: request.method,
                   path: request.url,
                   statusCode: 200,
-                  time: 'N/A',
+                  time: 'Recent',
                   onTap: () {
                     AppRouter.push(
                       context,

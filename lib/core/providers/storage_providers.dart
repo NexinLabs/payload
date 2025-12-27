@@ -122,7 +122,9 @@ class HistoryNotifier extends StateNotifier<List<HttpRequestModel>> {
   }
 
   Future<void> addToHistory(HttpRequestModel request) async {
-    state = [request, ...state].take(50).toList(); // Keep last 50
+    // Remove if already exists to move it to top
+    final filtered = state.where((r) => r.id != request.id).toList();
+    state = [request, ...filtered].take(50).toList(); // Keep last 50
     await _storage.saveHistory(state);
   }
 
