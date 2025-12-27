@@ -56,8 +56,8 @@ class HttpRequestModel {
       final uri = Uri.parse(url);
       final queryParams = Map<String, String>.from(uri.queryParameters);
       for (var p in params) {
-        if (p.enabled && p.key.isNotEmpty) {
-          queryParams[p.key] = p.value;
+        if (p.enabled && p.key.trim().isNotEmpty) {
+          queryParams[p.key.trim()] = p.value;
         }
       }
       return uri.replace(queryParameters: queryParams).toString();

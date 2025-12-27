@@ -175,9 +175,18 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       name: _nameController.text,
       method: _selectedMethod,
       url: _urlController.text,
-      headers: _headers.where((h) => h.key.isNotEmpty).toList(),
-      params: _params.where((p) => p.key.isNotEmpty).toList(),
-      formData: _formData.where((f) => f.key.isNotEmpty).toList(),
+      headers: _headers
+          .where((h) => h.key.trim().isNotEmpty)
+          .map((h) => h.copyWith(key: h.key.trim()))
+          .toList(),
+      params: _params
+          .where((p) => p.key.trim().isNotEmpty)
+          .map((p) => p.copyWith(key: p.key.trim()))
+          .toList(),
+      formData: _formData
+          .where((f) => f.key.trim().isNotEmpty)
+          .map((f) => f.copyWith(key: f.key.trim()))
+          .toList(),
       filePaths: _filePaths,
       body: _bodyType == 'none' ? null : _bodyController.text,
       bodyType: _bodyType,
@@ -331,7 +340,9 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                   decoration: BoxDecoration(
                     color: Colors.white.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: DropdownButtonHideUnderline(
                     child: DropdownButton<String>(
@@ -601,7 +612,9 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.05),
+                  ),
                 ),
                 child: TextField(
                   controller: _bodyController,

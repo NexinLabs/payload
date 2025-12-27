@@ -14,21 +14,21 @@ class RequestService {
       method: request.method,
       headers: {
         for (var h in request.headers)
-          if (h.enabled) h.key: h.value,
+          if (h.enabled && h.key.trim().isNotEmpty) h.key.trim(): h.value,
       },
       validateStatus: (status) => true,
     );
 
     final queryParameters = {
       for (var p in request.params)
-        if (p.enabled) p.key: p.value,
+        if (p.enabled && p.key.trim().isNotEmpty) p.key.trim(): p.value,
     };
 
     dynamic data = request.body;
     if (request.bodyType == 'form-data') {
       data = FormData.fromMap({
         for (var f in request.formData)
-          if (f.enabled) f.key: f.value,
+          if (f.enabled && f.key.trim().isNotEmpty) f.key.trim(): f.value,
       });
     } else if (request.bodyType == 'files') {
       data = FormData();

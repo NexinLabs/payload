@@ -1,9 +1,10 @@
 name: Release APK
 
 on:
-  push:
+
+  release:
     branches:
-      - release-main
+      - main
 
 jobs:
   build:
@@ -18,12 +19,12 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
-          java-version: '17'
+          java-version: '20'
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.1' # Using a stable version
+          flutter-version: '3.38.5' # Using a stable version
           channel: 'stable'
 
       - name: Install dependencies
@@ -35,7 +36,7 @@ jobs:
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/heads/release-main')
+        if: startsWith(github.ref, 'refs/heads/-main')
         with:
           files: build/app/outputs/flutter-apk/app-release.apk
           tag_name: v${{ github.run_number }}
