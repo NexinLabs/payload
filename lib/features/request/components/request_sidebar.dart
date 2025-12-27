@@ -27,6 +27,24 @@ class RequestSidebar extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Image.asset('assets/app_logo.png', height: 24),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'PAYLOAD',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(color: Colors.white10, height: 1),
             // Sessions (Collections) Section
             _buildSectionHeader(
               context,
@@ -206,7 +224,7 @@ class RequestSidebar extends ConsumerWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              r.url.isEmpty ? 'No URL' : _getPath(r.url),
+              r.url.isEmpty ? 'No URL' : _getPath(r.fullUrl),
               style: const TextStyle(color: Colors.white38, fontSize: 11),
               overflow: TextOverflow.ellipsis,
             ),
@@ -228,7 +246,11 @@ class RequestSidebar extends ConsumerWidget {
   String _getPath(String url) {
     try {
       final uri = Uri.parse(url);
-      return uri.path.isEmpty ? '/' : uri.path;
+      String path = uri.path.isEmpty ? '/' : uri.path;
+      if (uri.hasQuery) {
+        path += '?${uri.query}';
+      }
+      return path;
     } catch (_) {
       return url;
     }

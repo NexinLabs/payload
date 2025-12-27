@@ -50,6 +50,22 @@ class HttpRequestModel {
     this.bodyType = 'none',
   });
 
+  String get fullUrl {
+    if (params.isEmpty) return url;
+    try {
+      final uri = Uri.parse(url);
+      final queryParams = Map<String, String>.from(uri.queryParameters);
+      for (var p in params) {
+        if (p.enabled && p.key.isNotEmpty) {
+          queryParams[p.key] = p.value;
+        }
+      }
+      return uri.replace(queryParameters: queryParams).toString();
+    } catch (_) {
+      return url;
+    }
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'name': name,

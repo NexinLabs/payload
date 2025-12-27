@@ -25,6 +25,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   late TextEditingController _urlController;
   late TextEditingController _nameController;
   late TextEditingController _bodyController;
+  late String _requestId;
   String _selectedMethod = 'GET';
   String _bodyType = 'none';
   List<KeyValue> _headers = [];
@@ -34,6 +35,8 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
   dio.Response? _response;
   bool _isLoading = false;
+  bool _isUpdatingUrl = false;
+  bool _isUpdatingParams = false;
 
   final Map<int, TextEditingController> _keyControllers = {};
   final Map<int, TextEditingController> _valueControllers = {};
@@ -51,6 +54,8 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 5, vsync: this);
+    _requestId =
+        widget.request?.id ?? DateTime.now().millisecondsSinceEpoch.toString();
     _urlController = TextEditingController(text: widget.request?.url ?? '');
     _nameController = TextEditingController(
       text: widget.request?.name ?? 'New Request',
@@ -68,10 +73,47 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       widget.request?.formData ?? [KeyValue(key: '', value: '')],
     );
     _filePaths = List.from(widget.request?.filePaths ?? []);
+
+    _urlController.addListener(_onUrlChanged);
+  }
+
+  void _onUrlChanged() {
+    if (_isUpdatingUrl) return;
+    _isUpdatingParams = true;
+    try {
+      final uri = Uri.parse(_urlController.text);
+      if (uri.hasQuery) {
+        final newParams = uri.queryParameters.entries
+            .map((e) => KeyValue(key: e.key, value: e.value))
+            .toList();
+        setState(() {
+          _params = newParams.isEmpty
+              ? [KeyValue(key: '', value: '')]
+              : newParams;
+        });
+      }
+    } catch (_) {}
+    _isUpdatingParams = false;
+  }
+
+  void _updateUrlFromParams() {
+    if (_isUpdatingParams) return;
+    _isUpdatingUrl = true;
+    try {
+      final uri = Uri.parse(_urlController.text);
+      final enabledParams = _params
+          .where((p) => p.key.isNotEmpty && p.enabled)
+          .toList();
+      final queryParams = {for (var p in enabledParams) p.key: p.value};
+      final newUri = uri.replace(queryParameters: queryParams);
+      _urlController.text = newUri.toString();
+    } catch (_) {}
+    _isUpdatingUrl = false;
   }
 
   @override
   void dispose() {
+    _urlController.removeListener(_onUrlChanged);
     _tabController.dispose();
     _urlController.dispose();
     _nameController.dispose();
@@ -87,9 +129,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
   HttpRequestModel _getCurrentRequest() {
     return HttpRequestModel(
-      id:
-          widget.request?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
+      id: _requestId,
       name: _nameController.text,
       method: _selectedMethod,
       url: _urlController.text,
@@ -119,7 +159,29 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       setState(() {
         _response = response;
       });
-      ref.read(historyProvider.notifier).addToHistory(request);
+
+      // Save to collection if it's a new request or update if it exists
+      final collections = ref.read(collectionsProvider);
+      final selectedId = ref.read(selectedCollectionIdProvider);
+
+      bool exists = false;
+      for (var c in collections) {
+        if (c.requests.any((r) => r.id == request.id)) {
+          exists = true;
+          break;
+        }
+      }
+
+      if (exists) {
+        await ref.read(collectionsProvider.notifier).updateRequest(request);
+      } else if (selectedId != null) {
+        await ref
+            .read(collectionsProvider.notifier)
+            .addRequestToCollection(selectedId, request);
+      } else {
+        // Fallback to history if no collection selected (though usually there is one)
+        ref.read(historyProvider.notifier).addToHistory(request);
+      }
 
       // Open response view
       if (!mounted) return;
@@ -156,6 +218,8 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       ).showSnackBar(const SnackBar(content: Text('Request updated')));
     } else {
       final collections = ref.read(collectionsProvider);
+      final selectedId = ref.read(selectedCollectionIdProvider);
+
       if (collections.isEmpty) {
         final newColl = CollectionModel(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
@@ -163,6 +227,10 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
           requests: [request],
         );
         await ref.read(collectionsProvider.notifier).addCollection(newColl);
+      } else if (selectedId != null) {
+        await ref
+            .read(collectionsProvider.notifier)
+            .addRequestToCollection(selectedId, request);
       } else {
         await ref
             .read(collectionsProvider.notifier)
@@ -311,11 +379,10 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                _buildKeyValueEditor(
-                  _params,
-                  (newList) => setState(() => _params = newList),
-                  'params',
-                ),
+                _buildKeyValueEditor(_params, (newList) {
+                  setState(() => _params = newList);
+                  _updateUrlFromParams();
+                }, 'params'),
                 _buildKeyValueEditor(
                   _headers,
                   (newList) => setState(() => _headers = newList),
