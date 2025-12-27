@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart' as dio;
 import 'package:file_picker/file_picker.dart';
 import 'components/response_view.dart';
+import 'components/request_sidebar.dart';
 import '../../core/models/http_request.dart';
 import '../../core/models/collection.dart';
 import '../../core/services/request_service.dart';
@@ -211,7 +212,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             ),
         ],
       ),
-      drawer: _buildRequestSidebar(),
+      drawer: const RequestSidebar(),
       body: Column(
         children: [
           Padding(
@@ -575,91 +576,5 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       default:
         return Colors.grey;
     }
-  }
-
-  Widget _buildRequestSidebar() {
-    final collections = ref.watch(collectionsProvider);
-    final history = ref.watch(historyProvider);
-
-    return Drawer(
-      child: Column(
-        children: [
-          const DrawerHeader(
-            child: Center(
-              child: Text(
-                'REQUESTS',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView(
-              children: [
-                const ListTile(
-                  title: Text(
-                    'Collections',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ...collections.expand(
-                  (c) => c.requests.map(
-                    (r) => ListTile(
-                      leading: Text(
-                        r.method,
-                        style: TextStyle(
-                          color: _getMethodColor(r.method),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      ),
-                      title: Text(r.name, style: const TextStyle(fontSize: 13)),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                RequestEditorScreen(request: r),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                const Divider(),
-                const ListTile(
-                  title: Text(
-                    'History',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                ...history.map(
-                  (r) => ListTile(
-                    leading: Text(
-                      r.method,
-                      style: TextStyle(
-                        color: _getMethodColor(r.method),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10,
-                      ),
-                    ),
-                    title: Text(r.name, style: const TextStyle(fontSize: 13)),
-                    onTap: () {
-                      Navigator.pop(context);
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => RequestEditorScreen(request: r),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 }

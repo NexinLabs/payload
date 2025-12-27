@@ -17,6 +17,11 @@ final historyProvider =
       return HistoryNotifier(storage);
     });
 
+final selectedCollectionIdProvider = StateProvider<String?>((ref) {
+  final collections = ref.watch(collectionsProvider);
+  return collections.isNotEmpty ? collections.first.id : null;
+});
+
 class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
   final StorageService _storage;
 
