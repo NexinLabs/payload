@@ -33,7 +33,10 @@ class RequestUtils {
     return getCollection(ref, requestId)?.environments ?? [];
   }
 
-  static String _mergeCookies(String existing, List<String> newSetCookies) {
+  static Map<String, String> _parseCookies(
+    String existing,
+    List<String> newSetCookies,
+  ) {
     Map<String, String> cookieMap = {};
     if (existing.isNotEmpty) {
       for (var part in existing.split(';')) {
@@ -50,7 +53,7 @@ class RequestUtils {
         cookieMap[kv[0].trim()] = kv.sublist(1).join('=').trim();
       }
     }
-    return cookieMap.entries.map((e) => '${e.key}=${e.value}').join('; ');
+    return cookieMap;
   }
 
   static HttpRequestModel getCurrentRequest({
@@ -140,14 +143,17 @@ class RequestUtils {
                   ?.value ??
               '';
 
-          final updatedCookies = _mergeCookies(existingCookies, setCookies);
+          final cookieMap = _parseCookies(existingCookies, setCookies);
+          final updatedCookies = cookieMap.entries
+              .map((e) => '${e.key}=${e.value}')
+              .join('; ');
+
           await ref
               .read(collectionsProvider.notifier)
-              .updateCollectionEnvironment(
-                collection.id,
-                'Cookies',
-                updatedCookies,
-              );
+              .updateCollectionEnvironments(collection.id, {
+                'Cookies': updatedCookies,
+                ...cookieMap,
+              });
         }
       }
 

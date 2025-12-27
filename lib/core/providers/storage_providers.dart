@@ -74,22 +74,23 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
     await _storage.saveCollections(state);
   }
 
-  Future<void> updateCollectionEnvironment(
+  Future<void> updateCollectionEnvironments(
     String collectionId,
-    String key,
-    String value,
+    Map<String, String> updates,
   ) async {
     state = [
       for (final c in state)
         if (c.id == collectionId)
           (() {
             final envs = List<KeyValue>.from(c.environments);
-            final index = envs.indexWhere((e) => e.key == key);
-            if (index != -1) {
-              envs[index] = envs[index].copyWith(value: value, enabled: true);
-            } else {
-              envs.add(KeyValue(key: key, value: value, enabled: true));
-            }
+            updates.forEach((key, value) {
+              final index = envs.indexWhere((e) => e.key == key);
+              if (index != -1) {
+                envs[index] = envs[index].copyWith(value: value, enabled: true);
+              } else {
+                envs.add(KeyValue(key: key, value: value, enabled: true));
+              }
+            });
             return c.copyWith(environments: envs);
           })()
         else
