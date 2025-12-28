@@ -19,7 +19,7 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 
 
 ## Currently Supported Platforms(available builds)
-- [ x ] Android
+- [x] Android
 - [ ] Windows
 - [ ] Linux
 
