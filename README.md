@@ -1,25 +1,29 @@
 # Payload
 
-A powerful and modern API client built with Flutter. Payload allows you to test, organize, and manage your HTTP and WebSocket requests with ease.
+Just an API client with the feel of popular desktop API clients like Postman or Insomnia but for mobile devices.
 
 ## Features
 
 - **HTTP Client**: Support for GET, POST, PUT, DELETE, and more.
 - **WebSocket Support**: Real-time communication testing.
 - **Collections**: Organize your requests into logical groups.
-- **Environments**: Manage variables across different environments (Development, Staging, Production).
+- **Environments**: Supports collection specific environment with feature like cookie managed keys.
 - **History**: Keep track of your past requests.
-- **Modern UI**: Clean, dark-themed interface built with Google Fonts and Flutter Animate.
-- **JSON Viewer**: Integrated JSON viewer for easy response analysis.
 
 ## Getting Started
 
 ### Prerequisites
 
 - Flutter SDK (Stable channel)
-- Android Studio / VS Code with Flutter extension
+- Android Studio / VS Code with Flutter extension (optional but recommended)
 
-### Installation
+
+## Currently Supported Platforms(available builds)
+- [ x ] Android
+- [ ] Windows
+- [ ] Linux
+
+### Project Setup
 
 1. Clone the repository:
    ```bash
@@ -38,12 +42,6 @@ A powerful and modern API client built with Flutter. Payload allows you to test,
    flutter run
    ```
 
-## CI/CD
-
-This project uses GitHub Actions to automatically build and release the APK.
-- **Release Branch**: `release-main`
-- **Workflow**: Builds a release APK and uploads it to GitHub Releases whenever code is pushed to the `release-main` branch.
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License - see the [LICENSE](LICENSE) file for details.
