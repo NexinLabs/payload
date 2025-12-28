@@ -10,6 +10,19 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 - **Environments**: Supports collection specific environment with feature like cookie managed keys.
 - **History**: Keep track of your past requests.
 
+
+## TODOS
+- [x] Request Client Core
+- [x] Import/Export configuration 
+- [x] Request collection
+- [x] Collection Environment
+- [x] Cookie managed environment
+- [x] Pretty json rendering 
+- [ ] Websocket client
+- [ ] Global environment configuration
+- [ ] Data encryption even import-export
+- [ ] Plugin Support
+
 ## Getting Started
 
 ### Prerequisites
