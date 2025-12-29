@@ -40,7 +40,7 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/hunter87ff/payload.git
+   git clone https://github.com/nexinlabs/payload.git
    ```
 2. Navigate to the project directory:
    ```bash
