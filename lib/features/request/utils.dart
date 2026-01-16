@@ -6,6 +6,7 @@ import '../../core/models/collection.dart';
 import '../../core/services/request_service.dart';
 import '../../core/providers/storage_providers.dart';
 import '../../core/router/app_router.dart';
+import '../../core/services/ad_service.dart';
 
 class RequestUtils {
   static CollectionModel? getCollection(WidgetRef ref, String requestId) {
@@ -190,6 +191,7 @@ class RequestUtils {
           request: finalRequest,
         ),
       );
+      AdsService().incrementRequestCountAndShow();
     } catch (e) {
       if (!isMounted()) return;
       ScaffoldMessenger.of(
