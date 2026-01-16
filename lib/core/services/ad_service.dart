@@ -13,7 +13,7 @@ class AdsService {
   // Google Test ID: ca-app-pub-3940256099942544/1033173712
   final String _adUnitId = kDebugMode
       ? 'ca-app-pub-3940256099942544/1033173712'
-      : 'ca-app-pub-4812394189441495/2951672714';
+      : 'ca-app-pub-4812394189441495/6684061838';
 
   void loadInterstitialAd({bool showImmediately = false}) {
     if (_isAdLoading || (_interstitialAd != null && !showImmediately)) return;
