@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "369780016423",
+    "project_id": "payload-api-client",
+    "storage_bucket": "payload-api-client.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:369780016423:android:c097e2da9364060da41502",
+        "android_client_info": {
+          "package_name": "com.nexinlabs.payload"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAq92mjd6Bz8IANbcS8G4pXboesIfgivVM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

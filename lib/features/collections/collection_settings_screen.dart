@@ -157,7 +157,7 @@ class _CollectionSettingsScreenState
                 _useCookies = val;
               });
             },
-            activeColor: Theme.of(context).primaryColor,
+            activeThumbColor: Theme.of(context).primaryColor,
             contentPadding: EdgeInsets.zero,
           ),
           const SizedBox(height: 24),
