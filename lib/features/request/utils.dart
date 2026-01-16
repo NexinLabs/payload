@@ -191,7 +191,6 @@ class RequestUtils {
           request: finalRequest,
         ),
       );
-      AdsService().incrementRequestCountAndShow();
     } catch (e) {
       if (!isMounted()) return;
       ScaffoldMessenger.of(

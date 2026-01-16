@@ -10,8 +10,6 @@ import 'package:payload/core/services/ad_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await MobileAds.instance.initialize();
-  AdsService().loadInterstitialAd();
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
@@ -19,7 +17,13 @@ void main() async {
       statusBarColor: Colors.transparent,
     ),
   );
+
   runApp(const ProviderScope(child: PayloadApp()));
+
+  // Move heavy tasks after runApp to avoid blocking the initial frame
+  MobileAds.instance.initialize().then((_) {
+    AdsService().loadInterstitialAd(showImmediately: true);
+  });
 }
 
 class PayloadApp extends StatelessWidget {
