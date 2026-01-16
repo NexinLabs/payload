@@ -1,3 +1,4 @@
+import '../../../config.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -15,7 +16,7 @@ class SettingsUtils {
       'collections': collections.map((e) => e.toJson()).toList(),
       'history': history.map((e) => e.toJson()).toList(),
       'exportedAt': DateTime.now().toIso8601String(),
-      'version': '1.0.0',
+      'version': Config.appVersion,
     };
 
     final jsonString = const JsonEncoder.withIndent('  ').convert(data);
