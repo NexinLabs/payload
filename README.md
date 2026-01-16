@@ -10,6 +10,19 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 - **Environments**: Supports collection specific environment with feature like cookie managed keys.
 - **History**: Keep track of your past requests.
 
+
+## TODOS
+- [x] Request Client Core
+- [x] Import/Export configuration 
+- [x] Request collection
+- [x] Collection Environment
+- [x] Cookie managed environment
+- [x] Pretty json rendering 
+- [ ] Websocket client
+- [ ] Global environment configuration
+- [ ] Data encryption even import-export
+- [ ] Plugin Support
+
 ## Getting Started
 
 ### Prerequisites
@@ -19,7 +32,7 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 
 
 ## Currently Supported Platforms(available builds)
-- [ x ] Android
+- [x] Android
 - [ ] Windows
 - [ ] Linux
 
@@ -27,7 +40,7 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/hunter87ff/payload.git
+   git clone https://github.com/nexinlabs/payload.git
    ```
 2. Navigate to the project directory:
    ```bash
