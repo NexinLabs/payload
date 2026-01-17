@@ -22,13 +22,6 @@ class SettingsScreen extends ConsumerWidget {
         children: [
           _buildSectionHeader('Interface'),
           _buildSettingTile(
-            icon: Icons.text_fields,
-            title: 'Editor Font Size',
-            subtitle: '14px',
-            trailing: _buildUpcomingLabel(),
-            enabled: false,
-          ),
-          _buildSettingTile(
             icon: Icons.code,
             title: 'Syntax Highlighting',
             subtitle: settings.syntaxHighlighting ? 'Enabled' : 'Disabled',
@@ -213,25 +206,6 @@ class SettingsScreen extends ConsumerWidget {
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpcomingLabel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.blueAccent.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-      ),
-      child: const Text(
-        'UPCOMING',
-        style: TextStyle(
-          color: Colors.blueAccent,
-          fontSize: 8,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

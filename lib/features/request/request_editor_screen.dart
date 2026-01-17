@@ -262,12 +262,28 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
   PreferredSizeWidget _buildAppBar(bool isMobile) {
     return AppBar(
-      title: TextField(
-        controller: _nameController,
-        style: const TextStyle(color: Colors.white, fontSize: 18),
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          hintText: 'Request Name',
+      toolbarHeight: 75,
+      elevation: 0,
+      backgroundColor: AppTheme.backgroundColor,
+      shape: const Border(bottom: BorderSide(color: Colors.white10, width: 1)),
+      titleSpacing: isMobile ? 0 : 20,
+      title: Container(
+        padding: const EdgeInsets.only(
+          top: 10,
+        ), // Padding from the top of the bar
+        child: TextField(
+          controller: _nameController,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+          ),
+          decoration: InputDecoration(
+            border: InputBorder.none,
+            hintText: 'Request Name',
+            hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.3)),
+            contentPadding: const EdgeInsets.symmetric(vertical: 12),
+          ),
         ),
       ),
       leading: isMobile
@@ -277,10 +293,14 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
             )
           : null,
       actions: [
-        IconButton(icon: const Icon(Icons.save), onPressed: _saveRequest),
+        IconButton(
+          icon: const Icon(Icons.save_outlined, size: 26),
+          tooltip: 'Save Request',
+          onPressed: _saveRequest,
+        ),
         if (_response != null)
           IconButton(
-            icon: const Icon(Icons.analytics_outlined),
+            icon: const Icon(Icons.analytics_outlined, size: 26),
             onPressed: () {
               AppRouter.push(
                 context,
@@ -292,6 +312,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
               );
             },
           ),
+        const SizedBox(width: 8),
       ],
     );
   }
