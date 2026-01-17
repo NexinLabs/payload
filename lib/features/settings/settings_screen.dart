@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/providers/storage_providers.dart';
+import '../../core/providers/socket_provider.dart';
 import 'utils/settings_utils.dart';
 import 'package:payload/config.dart';
 
@@ -13,6 +14,7 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final collections = ref.watch(collectionsProvider);
     final history = ref.watch(historyProvider);
+    final sockets = ref.watch(socketConnectionsProvider);
 
     return Scaffold(
       body: ListView(
@@ -83,6 +85,7 @@ class SettingsScreen extends ConsumerWidget {
               await SettingsUtils.exportData(
                 collections: collections,
                 history: history,
+                sockets: sockets,
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -105,6 +108,9 @@ class SettingsScreen extends ConsumerWidget {
                   await ref
                       .read(historyProvider.notifier)
                       .setHistory(data['history']);
+                  await ref
+                      .read(socketConnectionsProvider.notifier)
+                      .setConnections(data['sockets']);
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +150,6 @@ class SettingsScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
-
                 // Credits
                 const Text(
                   'DEVELOPED BY',
@@ -187,7 +192,6 @@ class SettingsScreen extends ConsumerWidget {
                     fontSize: 10,
                   ),
                 ),
-
               ],
             ),
           ),

@@ -29,6 +29,8 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
     if (socket != null) {
       _nameController.text = socket.name;
       _urlController.text = socket.url;
+      _payloadController.text =
+          socket.lastPayload; // Fix: Load previous payload
       if (socket.events.isNotEmpty) {
         _selectedEvent = socket.events.contains(_selectedEvent)
             ? _selectedEvent
@@ -37,6 +39,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
     } else {
       _nameController.clear();
       _urlController.clear();
+      _payloadController.clear();
     }
   }
 
@@ -292,6 +295,9 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             controller: _payloadController,
             maxLines: 4,
             style: const TextStyle(fontFamily: 'monospace', fontSize: 13),
+            onChanged: (val) {
+              _updateSocket(socket.copyWith(lastPayload: val));
+            },
             decoration: const InputDecoration(
               labelText: 'Payload',
               alignLabelWithHint: true,
@@ -334,7 +340,9 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             if (socket.messages.isNotEmpty)
               TextButton.icon(
                 onPressed: () {
-                  _updateSocket(socket.copyWith(messages: []));
+                  ref
+                      .read(socketConnectionsProvider.notifier)
+                      .clearMessages(socket.id);
                 },
                 icon: const Icon(Icons.clear_all, size: 18),
                 label: const Text('Clear'),
@@ -457,16 +465,20 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
     if (socket == null) return;
 
     try {
-      await ref.read(socketServiceProvider).connect(socket.url);
+      await ref.read(socketServiceProvider).connect(socket.id, socket.url);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Connection failed: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Connection failed: $e')));
+      }
     }
   }
 
-  void _disconnect() {
-    ref.read(socketServiceProvider).disconnect();
+  void _disconnect() async {
+    final socket = ref.read(currentSocketProvider);
+    if (socket == null) return;
+    await ref.read(socketServiceProvider).disconnect(socket.id);
   }
 
   void _emitMessage() {
@@ -474,7 +486,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
     if (socket == null) return;
 
     final payload = _payloadController.text;
-    ref.read(socketServiceProvider).emit(_selectedEvent, payload);
+    ref.read(socketServiceProvider).emit(socket.id, _selectedEvent, payload);
     // Message will be added to list by the listener in the provider
   }
 
@@ -483,27 +495,65 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Socket Settings'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _nameController,
-              decoration: const InputDecoration(
-                labelText: 'Name',
-                hintText: 'My Socket Server',
+        content: SizedBox(
+          width: 500, // Make it wider
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  hintText: 'My Socket Server',
+                ),
+                onChanged: (val) => _updateSocket(socket.copyWith(name: val)),
               ),
-              onChanged: (val) => _updateSocket(socket.copyWith(name: val)),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _urlController,
-              decoration: const InputDecoration(
-                labelText: 'URL',
-                hintText: 'ws://echo.websocket.org',
+              const SizedBox(height: 16),
+              TextField(
+                controller: _urlController,
+                decoration: const InputDecoration(
+                  labelText: 'URL',
+                  hintText: 'ws://echo.websocket.org',
+                ),
+                onChanged: (val) => _updateSocket(socket.copyWith(url: val)),
               ),
-              onChanged: (val) => _updateSocket(socket.copyWith(url: val)),
-            ),
-          ],
+              const SizedBox(height: 24),
+              const Divider(),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Expanded(
+                    child: Text(
+                      'Danger Zone',
+                      style: TextStyle(
+                        color: AppTheme.errorColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      ref
+                          .read(socketConnectionsProvider.notifier)
+                          .clearMessages(socket.id);
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Logs cleared')),
+                      );
+                    },
+                    icon: const Icon(
+                      Icons.delete_sweep,
+                      color: AppTheme.errorColor,
+                    ),
+                    label: const Text(
+                      'Clear Logs',
+                      style: TextStyle(color: AppTheme.errorColor),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -521,13 +571,17 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add New Event'),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Event name',
-            helperText: 'For raw WebSockets, this is just a label for the log',
+        content: SizedBox(
+          width: 400,
+          child: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Event name',
+              helperText:
+                  'For raw WebSockets, this is just a label for the log',
+            ),
+            autofocus: true,
           ),
-          autofocus: true,
         ),
         actions: [
           TextButton(

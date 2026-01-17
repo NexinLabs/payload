@@ -34,6 +34,7 @@ class SocketConnectionModel {
   final String id;
   final String name;
   final String url;
+  final String lastPayload;
   final SocketStatus status;
   final List<String> events;
   final List<SocketMessage> messages;
@@ -43,6 +44,7 @@ class SocketConnectionModel {
     required this.id,
     required this.name,
     required this.url,
+    this.lastPayload = '',
     this.status = SocketStatus.disconnected,
     this.events = const ['message'],
     this.messages = const [],
@@ -53,6 +55,7 @@ class SocketConnectionModel {
     String? id,
     String? name,
     String? url,
+    String? lastPayload,
     SocketStatus? status,
     List<String>? events,
     List<SocketMessage>? messages,
@@ -62,6 +65,7 @@ class SocketConnectionModel {
       id: id ?? this.id,
       name: name ?? this.name,
       url: url ?? this.url,
+      lastPayload: lastPayload ?? this.lastPayload,
       status: status ?? this.status,
       events: events ?? this.events,
       messages: messages ?? this.messages,
@@ -73,6 +77,7 @@ class SocketConnectionModel {
     'id': id,
     'name': name,
     'url': url,
+    'lastPayload': lastPayload,
     'events': events,
     'headers': headers.map((e) => e.toJson()).toList(),
     // We might not want to save all messages to disk, or maybe we do.
@@ -84,6 +89,7 @@ class SocketConnectionModel {
         id: json['id'],
         name: json['name'],
         url: json['url'],
+        lastPayload: json['lastPayload'] ?? '',
         events: List<String>.from(json['events'] ?? ['message']),
         headers:
             (json['headers'] as List?)
@@ -96,4 +102,18 @@ class SocketConnectionModel {
                 .toList() ??
             [],
       );
+}
+
+class SocketStatusUpdate {
+  final String socketId;
+  final SocketStatus status;
+
+  SocketStatusUpdate(this.socketId, this.status);
+}
+
+class SocketMessageUpdate {
+  final String socketId;
+  final SocketMessage message;
+
+  SocketMessageUpdate(this.socketId, this.message);
 }

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/socket_model.dart';
 import '../services/socket_service.dart';
+import '../services/storage_service.dart';
+import 'storage_providers.dart';
 
 final socketServiceProvider = Provider.autoDispose((ref) {
   final service = SocketService();
@@ -15,7 +17,8 @@ final socketConnectionsProvider =
       List<SocketConnectionModel>
     >((ref) {
       final service = ref.watch(socketServiceProvider);
-      return SocketConnectionsNotifier(service);
+      final storage = ref.watch(storageServiceProvider);
+      return SocketConnectionsNotifier(service, storage);
     });
 
 final selectedSocketIdProvider = StateProvider<String?>((ref) => null);
@@ -33,41 +36,33 @@ final currentSocketProvider = Provider<SocketConnectionModel?>((ref) {
 class SocketConnectionsNotifier
     extends StateNotifier<List<SocketConnectionModel>> {
   final SocketService _service;
+  final StorageService _storageService;
   StreamSubscription? _messageSub;
   StreamSubscription? _statusSub;
 
-  SocketConnectionsNotifier(this._service) : super([]) {
+  SocketConnectionsNotifier(this._service, this._storageService) : super([]) {
+    _loadConnections();
     _listenToService();
+  }
+
+  Future<void> _loadConnections() async {
+    final connections = await _storageService.loadSockets();
+    state = connections;
+  }
+
+  Future<void> _saveConnections() async {
+    await _storageService.saveSockets(state);
   }
 
   void _listenToService() {
     _messageSub?.cancel();
-    _messageSub = _service.messages.listen((msg) {
-      if (state.isEmpty) return;
-      final activeIndex = state.indexWhere(
-        (s) =>
-            s.status == SocketStatus.connected ||
-            s.status == SocketStatus.connecting,
-      );
-      final socketId = activeIndex != -1
-          ? state[activeIndex].id
-          : state.first.id;
-      addMessage(socketId, msg);
+    _messageSub = _service.messages.listen((update) async {
+      await addMessage(update.socketId, update.message);
     });
 
     _statusSub?.cancel();
-    _statusSub = _service.status.listen((status) {
-      if (state.isEmpty) return;
-      final activeIndex = state.indexWhere(
-        (s) =>
-            s.status == SocketStatus.connected ||
-            s.status == SocketStatus.connecting ||
-            s.status == SocketStatus.error,
-      );
-      final socketId = activeIndex != -1
-          ? state[activeIndex].id
-          : state.first.id;
-      updateStatus(socketId, status);
+    _statusSub = _service.status.listen((update) {
+      updateStatus(update.socketId, update.status);
     });
   }
 
@@ -78,22 +73,30 @@ class SocketConnectionsNotifier
     super.dispose();
   }
 
-  void addConnection(SocketConnectionModel connection) {
+  Future<void> addConnection(SocketConnectionModel connection) async {
     state = [...state, connection];
+    await _saveConnections();
   }
 
-  void updateConnection(SocketConnectionModel connection) {
+  Future<void> setConnections(List<SocketConnectionModel> connections) async {
+    state = connections;
+    await _saveConnections();
+  }
+
+  Future<void> updateConnection(SocketConnectionModel connection) async {
     state = [
       for (final c in state)
         if (c.id == connection.id) connection else c,
     ];
+    await _saveConnections();
   }
 
-  void deleteConnection(String id) {
+  Future<void> deleteConnection(String id) async {
     state = state.where((c) => c.id != id).toList();
+    await _saveConnections();
   }
 
-  void addMessage(String socketId, SocketMessage message) {
+  Future<void> addMessage(String socketId, SocketMessage message) async {
     state = [
       for (final c in state)
         if (c.id == socketId)
@@ -101,6 +104,7 @@ class SocketConnectionsNotifier
         else
           c,
     ];
+    await _saveConnections();
   }
 
   void updateStatus(String socketId, SocketStatus status) {
@@ -108,9 +112,10 @@ class SocketConnectionsNotifier
       for (final c in state)
         if (c.id == socketId) c.copyWith(status: status) else c,
     ];
+    // No need to save status to disk, as it will always be disconnected on start
   }
 
-  void addEvent(String socketId, String eventName) {
+  Future<void> addEvent(String socketId, String eventName) async {
     state = [
       for (final c in state)
         if (c.id == socketId)
@@ -118,5 +123,14 @@ class SocketConnectionsNotifier
         else
           c,
     ];
+    await _saveConnections();
+  }
+
+  Future<void> clearMessages(String socketId) async {
+    state = [
+      for (final c in state)
+        if (c.id == socketId) c.copyWith(messages: []) else c,
+    ];
+    await _saveConnections();
   }
 }

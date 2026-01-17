@@ -6,15 +6,18 @@ import 'package:share_plus/share_plus.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../core/models/collection.dart';
 import '../../../core/models/http_request.dart';
+import '../../../core/models/socket_model.dart';
 
 class SettingsUtils {
   static Future<void> exportData({
     required List<CollectionModel> collections,
     required List<HttpRequestModel> history,
+    required List<SocketConnectionModel> sockets,
   }) async {
     final data = {
       'collections': collections.map((e) => e.toJson()).toList(),
       'history': history.map((e) => e.toJson()).toList(),
+      'sockets': sockets.map((e) => e.toJson()).toList(),
       'exportedAt': DateTime.now().toIso8601String(),
       'version': Config.appVersion,
     };
@@ -57,10 +60,13 @@ class SettingsUtils {
 
       final collectionsJson = data['collections'];
       final historyJson = data['history'];
+      final socketsJson = data['sockets'] ?? [];
 
-      if (collectionsJson is! List || historyJson is! List) {
+      if (collectionsJson is! List ||
+          historyJson is! List ||
+          socketsJson is! List) {
         throw const FormatException(
-          'Invalid backup file: collections and history must be lists',
+          'Invalid backup file: collections, history and sockets must be lists',
         );
       }
 
@@ -78,7 +84,18 @@ class SettingsUtils {
         return HttpRequestModel.fromJson(e);
       }).toList();
 
-      return {'collections': collections, 'history': history};
+      final sockets = socketsJson.map((e) {
+        if (e is! Map<String, dynamic>) {
+          throw const FormatException('Invalid socket data');
+        }
+        return SocketConnectionModel.fromJson(e);
+      }).toList();
+
+      return {
+        'collections': collections,
+        'history': history,
+        'sockets': sockets,
+      };
     } on FormatException catch (e) {
       throw Exception('Format Error: ${e.message}');
     } catch (e) {

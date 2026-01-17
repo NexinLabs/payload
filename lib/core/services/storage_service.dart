@@ -4,11 +4,13 @@ import 'package:path_provider/path_provider.dart';
 import '../models/collection.dart';
 import '../models/http_request.dart';
 import '../models/settings_model.dart';
+import '../models/socket_model.dart';
 
 class StorageService {
   static const String _collectionsFile = 'collections.json';
   static const String _historyFile = 'history.json';
   static const String _settingsFile = 'settings.json';
+  static const String _socketsFile = 'sockets.json';
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
@@ -28,6 +30,11 @@ class StorageService {
   Future<File> get _getSettingsFile async {
     final path = await _localPath;
     return File('$path/$_settingsFile');
+  }
+
+  Future<File> get _getSocketsFile async {
+    final path = await _localPath;
+    return File('$path/$_socketsFile');
   }
 
   Future<SettingsModel> loadSettings() async {
@@ -86,6 +93,33 @@ class StorageService {
     final file = await _getHistoryFile;
     final jsonString = json.encode(history.map((e) => e.toJson()).toList());
     await file.writeAsString(jsonString);
+  }
+
+  Future<List<SocketConnectionModel>> loadSockets() async {
+    try {
+      final file = await _getSocketsFile;
+      if (!await file.exists()) {
+        return [];
+      }
+      final contents = await file.readAsString();
+      final List<dynamic> jsonList = json.decode(contents);
+      return jsonList
+          .map((json) => SocketConnectionModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<void> saveSockets(List<SocketConnectionModel> sockets) async {
+    try {
+      final file = await _getSocketsFile;
+      final jsonString = json.encode(sockets.map((e) => e.toJson()).toList());
+      await file.writeAsString(jsonString);
+    } catch (e) {
+      // ignore: avoid_print
+      print('Error saving sockets: $e');
+    }
   }
 
   Future<void> saveRequestToFileSystem(
