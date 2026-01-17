@@ -50,6 +50,24 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
     'DELETE',
     'PATCH',
     'HEAD',
+    'OPTIONS',
+    'TRACE',
+    'CONNECT',
+    'COPY',
+    'LOCK',
+    'MKCOL',
+    'MOVE',
+    'PROPFIND',
+    'PROPPATCH',
+    'UNLOCK',
+    'REPORT',
+    'MKACTIVITY',
+    'CHECKOUT',
+    'MERGE',
+    'M-SEARCH',
+    'NOTIFY',
+    'SUBSCRIBE',
+    'UNSUBSCRIBE',
   ];
 
   @override
@@ -645,6 +663,16 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
         return Colors.orange;
       case 'DELETE':
         return Colors.red;
+      case 'PATCH':
+        return Colors.purple;
+      case 'HEAD':
+      case 'OPTIONS':
+        return Colors.teal;
+      case 'CONNECT':
+        return Colors.brown;
+      case 'TRACE':
+        return Colors.indigo;
+
       default:
         return Colors.grey;
     }

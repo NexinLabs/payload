@@ -60,8 +60,6 @@ class NavigationShell extends ConsumerWidget {
       appBar: AppBar(
         title: Row(
           children: [
-            Image.asset('assets/app_logo.png', height: 24),
-            const SizedBox(width: 10),
             Text(title),
           ],
         ),
