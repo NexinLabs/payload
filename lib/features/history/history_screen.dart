@@ -10,45 +10,34 @@ class HistoryScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final history = ref.watch(historyProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('History'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.delete_sweep),
-            onPressed: () => ref.read(historyProvider.notifier).clearHistory(),
-          ),
-        ],
-      ),
-      body: history.isEmpty
-          ? const Center(child: Text('No history yet'))
-          : ListView.builder(
-              itemCount: history.length,
-              itemBuilder: (context, index) {
-                final request = history[index];
-                return ListTile(
-                  leading: _MethodIndicator(method: request.method),
-                  title: Text(request.name),
-                  subtitle: Text(
-                    request.url,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      fontSize: 12,
-                    ),
+    return history.isEmpty
+        ? const Center(child: Text('No history yet'))
+        : ListView.builder(
+            itemCount: history.length,
+            itemBuilder: (context, index) {
+              final request = history[index];
+              return ListTile(
+                leading: _MethodIndicator(method: request.method),
+                title: Text(request.name),
+                subtitle: Text(
+                  request.url,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    fontSize: 12,
                   ),
-                  onTap: () {
-                    AppRouter.push(
-                      context,
-                      AppRouter.requestEditor,
-                      arguments: request,
-                    );
-                  },
-                );
-              },
-            ),
-    );
+                ),
+                onTap: () {
+                  AppRouter.push(
+                    context,
+                    AppRouter.requestEditor,
+                    arguments: request,
+                  );
+                },
+              );
+            },
+          );
   }
 }
 

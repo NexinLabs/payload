@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/providers/storage_providers.dart';
+import '../../core/providers/socket_provider.dart';
 import 'utils/settings_utils.dart';
 import 'package:payload/config.dart';
 
@@ -13,19 +14,13 @@ class SettingsScreen extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
     final collections = ref.watch(collectionsProvider);
     final history = ref.watch(historyProvider);
+    final sockets = ref.watch(socketConnectionsProvider);
 
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           _buildSectionHeader('Interface'),
-          _buildSettingTile(
-            icon: Icons.text_fields,
-            title: 'Editor Font Size',
-            subtitle: '14px',
-            trailing: _buildUpcomingLabel(),
-            enabled: false,
-          ),
           _buildSettingTile(
             icon: Icons.code,
             title: 'Syntax Highlighting',
@@ -83,6 +78,7 @@ class SettingsScreen extends ConsumerWidget {
               await SettingsUtils.exportData(
                 collections: collections,
                 history: history,
+                sockets: sockets,
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -105,6 +101,9 @@ class SettingsScreen extends ConsumerWidget {
                   await ref
                       .read(historyProvider.notifier)
                       .setHistory(data['history']);
+                  await ref
+                      .read(socketConnectionsProvider.notifier)
+                      .setConnections(data['sockets']);
 
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +143,6 @@ class SettingsScreen extends ConsumerWidget {
           Center(
             child: Column(
               children: [
-
                 // Credits
                 const Text(
                   'DEVELOPED BY',
@@ -187,7 +185,6 @@ class SettingsScreen extends ConsumerWidget {
                     fontSize: 10,
                   ),
                 ),
-
               ],
             ),
           ),
@@ -209,25 +206,6 @@ class SettingsScreen extends ConsumerWidget {
             fontSize: 11,
             fontWeight: FontWeight.w500,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildUpcomingLabel() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.blueAccent.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: Colors.blueAccent.withValues(alpha: 0.3)),
-      ),
-      child: const Text(
-        'UPCOMING',
-        style: TextStyle(
-          color: Colors.blueAccent,
-          fontSize: 8,
-          fontWeight: FontWeight.bold,
         ),
       ),
     );

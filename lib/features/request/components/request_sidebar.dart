@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:payload/config.dart';
+import 'package:payload/core/theme/app_theme.dart';
 import '../../../core/models/http_request.dart';
 import '../../../core/models/collection.dart';
 import '../../../core/providers/storage_providers.dart';
@@ -34,14 +35,22 @@ class RequestSidebar extends ConsumerWidget {
       }
     }
 
-    return Drawer(
-      backgroundColor: const Color(0xFF1E1E1E),
+    return Container(
+      width: 300,
+      decoration: const BoxDecoration(
+        color: AppTheme.surfaceColor,
+        border: Border(right: BorderSide(color: Colors.white10)),
+      ),
       child: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   Image.asset('assets/app_logo.png', height: 24),
@@ -49,9 +58,9 @@ class RequestSidebar extends ConsumerWidget {
                   const Expanded(
                     child: Text(
                       Config.appName,
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -78,7 +87,10 @@ class RequestSidebar extends ConsumerWidget {
               },
               onSettingsPressed: () {
                 if (selectedCollection != null) {
-                  AppRouter.pop(context);
+                  final isMobile = MediaQuery.of(context).size.width < 800;
+                  if (isMobile) {
+                    AppRouter.pop(context);
+                  }
                   AppRouter.push(
                     context,
                     AppRouter.collectionSettings,
@@ -95,7 +107,7 @@ class RequestSidebar extends ConsumerWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
-                  vertical: 8.0,
+                  vertical: 4.0,
                 ),
                 child: GestureDetector(
                   onLongPress: () {
@@ -150,7 +162,7 @@ class RequestSidebar extends ConsumerWidget {
                 ),
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
 
             // Requests Section
             _buildSectionHeader(
@@ -162,7 +174,10 @@ class RequestSidebar extends ConsumerWidget {
                     !isExpanded;
               },
               onAddPressed: () {
-                AppRouter.pop(context);
+                final isMobile = MediaQuery.of(context).size.width < 800;
+                if (isMobile) {
+                  AppRouter.pop(context);
+                }
                 AppRouter.replace(context, AppRouter.requestEditor);
               },
               onWrapToggle: () {
@@ -188,7 +203,7 @@ class RequestSidebar extends ConsumerWidget {
                     const Padding(
                       padding: EdgeInsets.symmetric(
                         horizontal: 16.0,
-                        vertical: 8.0,
+                        vertical: 4.0,
                       ),
                       child: Text(
                         'History',
@@ -230,7 +245,10 @@ class RequestSidebar extends ConsumerWidget {
             ),
             onTap: () {
               Navigator.pop(context);
-              AppRouter.pop(context);
+              final isMobile = MediaQuery.of(context).size.width < 800;
+              if (isMobile) {
+                AppRouter.pop(context);
+              }
               AppRouter.push(
                 context,
                 AppRouter.collectionSettings,
@@ -268,7 +286,7 @@ class RequestSidebar extends ConsumerWidget {
     bool isWrap = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
       child: Row(
         children: [
           GestureDetector(
@@ -293,7 +311,7 @@ class RequestSidebar extends ConsumerWidget {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
-                      fontSize: 14,
+                      fontSize: 13,
                     ),
                   ),
                   if (subtitle.isNotEmpty) ...[
@@ -303,7 +321,7 @@ class RequestSidebar extends ConsumerWidget {
                         subtitle,
                         style: const TextStyle(
                           color: Colors.white54,
-                          fontSize: 14,
+                          fontSize: 12,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -359,7 +377,7 @@ class RequestSidebar extends ConsumerWidget {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
       title: Text(
         r.name,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(color: Colors.white, fontSize: 13),
         maxLines: isWrap ? null : 1,
         overflow: isWrap ? null : TextOverflow.ellipsis,
       ),
@@ -373,14 +391,14 @@ class RequestSidebar extends ConsumerWidget {
             style: TextStyle(
               color: _getMethodColor(r.method),
               fontWeight: FontWeight.bold,
-              fontSize: 11,
+              fontSize: 10,
             ),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               r.url.isEmpty ? 'No URL' : _getPath(r.fullUrl),
-              style: const TextStyle(color: Colors.white38, fontSize: 11),
+              style: const TextStyle(color: Colors.white38, fontSize: 10),
               overflow: isWrap ? null : TextOverflow.ellipsis,
               maxLines: isWrap ? null : 1,
             ),
@@ -389,7 +407,10 @@ class RequestSidebar extends ConsumerWidget {
       ),
       onTap: () {
         ref.read(historyProvider.notifier).addToHistory(r);
-        AppRouter.pop(context);
+        final isMobile = MediaQuery.of(context).size.width < 800;
+        if (isMobile) {
+          AppRouter.pop(context); // Close the drawer on mobile
+        }
         AppRouter.replace(context, AppRouter.requestEditor, arguments: r);
       },
       onLongPress: () => _showRequestOptions(context, ref, r),
