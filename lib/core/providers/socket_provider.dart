@@ -126,6 +126,17 @@ class SocketConnectionsNotifier
     await _saveConnections();
   }
 
+  Future<void> deleteEvent(String socketId, String eventName) async {
+    state = [
+      for (final c in state)
+        if (c.id == socketId)
+          c.copyWith(events: c.events.where((e) => e != eventName).toList())
+        else
+          c,
+    ];
+    await _saveConnections();
+  }
+
   Future<void> clearMessages(String socketId) async {
     state = [
       for (final c in state)

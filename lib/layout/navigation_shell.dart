@@ -44,7 +44,7 @@ class NavigationShell extends ConsumerWidget {
         sidebarContent = const RequestSidebar();
         break;
       case 3:
-        title = 'WebSocket Master';
+        title = 'WebSocket';
         sidebarContent = const SocketSidebar();
         break;
       case 4:

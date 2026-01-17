@@ -6,11 +6,68 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:payload/core/router/app_router.dart';
 import 'package:payload/core/providers/navigation_provider.dart';
 import '../../core/providers/storage_providers.dart';
-// import '../../core/models/http_request.dart';
+import '../../core/services/curl_parser_service.dart';
 // import '../../core/models/collection.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
+
+  void _showImportCurlDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import CURL'),
+        content: TextField(
+          controller: controller,
+          maxLines: 5,
+          decoration: const InputDecoration(
+            hintText: 'Paste curl command here...',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.trim().isEmpty) return;
+              try {
+                final request = CurlParserService.parse(controller.text.trim());
+                if (request.url.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Could not find a valid URL in the CURL command',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+                Navigator.pop(context);
+                AppRouter.push(
+                  context,
+                  AppRouter.requestEditor,
+                  arguments: request,
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to parse CURL: $e'),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              }
+            },
+            child: const Text('Import'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -97,20 +154,22 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.sync_alt,
                   color: Colors.purple,
                   onTap: () {
-                    AppRouter.push(context, AppRouter.socket);
+                    ref.read(navigationIndexProvider.notifier).state = 3;
                   },
                 ),
                 QuickActionButton(
                   label: 'Import cURL',
                   icon: Icons.input,
                   color: Colors.orange,
-                  onTap: () {},
+                  onTap: () => _showImportCurlDialog(context),
                 ),
                 QuickActionButton(
-                  label: 'Environments',
-                  icon: Icons.language,
+                  label: 'Collections',
+                  icon: Icons.folder_special,
                   color: Colors.teal,
-                  onTap: () {},
+                  onTap: () {
+                    ref.read(navigationIndexProvider.notifier).state = 2;
+                  },
                 ),
               ],
             ).animate().fadeIn(delay: 200.ms).scale(),

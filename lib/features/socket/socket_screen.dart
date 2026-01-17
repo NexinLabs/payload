@@ -79,7 +79,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
           ),
           const SizedBox(height: 24),
           const Text(
-            'WebSocket Master',
+            'WebSocket',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
@@ -274,21 +274,78 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          DropdownButtonFormField<String>(
-            value: socket.events.contains(_selectedEvent)
-                ? _selectedEvent
-                : socket.events.first,
-            decoration: const InputDecoration(
-              labelText: 'Event',
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            ),
-            items: socket.events
-                .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                .toList(),
-            onChanged: (val) {
-              if (val != null) setState(() => _selectedEvent = val);
-            },
+          Row(
+            children: [
+              Expanded(
+                child: DropdownButtonFormField<String>(
+                  value: socket.events.contains(_selectedEvent)
+                      ? _selectedEvent
+                      : socket.events.first,
+                  decoration: const InputDecoration(
+                    labelText: 'Event',
+                    labelStyle: TextStyle(
+                      color: AppTheme.secondaryTextColor
+                    ),
+                    border: OutlineInputBorder(),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                  ),
+                  items: socket.events.map((e) {
+                    return DropdownMenuItem(
+                      value: e,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(e),
+                          if (e != 'message')
+                            IconButton(
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                size: 18,
+                                color: AppTheme.errorColor,
+                              ),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                ref
+                                    .read(socketConnectionsProvider.notifier)
+                                    .deleteEvent(socket.id, e);
+                                if (_selectedEvent == e) {
+                                  setState(() => _selectedEvent = 'message');
+                                }
+                              },
+                            ),
+                        ],
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) setState(() => _selectedEvent = val);
+                  },
+                ),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                height: 52,
+                width: 52,
+                decoration: BoxDecoration(
+                  color: socket.status == SocketStatus.connected
+                      ? AppTheme.primaryColor
+                      : AppTheme.primaryColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: IconButton(
+                  onPressed: socket.status == SocketStatus.connected
+                      ? _emitMessage
+                      : null,
+                  icon: const Icon(Icons.send),
+                  color: Colors.white,
+                  tooltip: 'Emit Event',
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           TextField(
@@ -300,25 +357,12 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             },
             decoration: const InputDecoration(
               labelText: 'Payload',
+              labelStyle: TextStyle(
+                color: AppTheme.secondaryTextColor
+              ),
               alignLabelWithHint: true,
               border: OutlineInputBorder(),
               hintText: 'Enter message or JSON...',
-            ),
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: ElevatedButton.icon(
-              onPressed: socket.status == SocketStatus.connected
-                  ? _emitMessage
-                  : null,
-              icon: const Icon(Icons.rocket_launch),
-              label: const Text('Emit Event'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                foregroundColor: Colors.white,
-              ),
             ),
           ),
         ],
