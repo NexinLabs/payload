@@ -8,6 +8,7 @@ import '../../core/models/http_request.dart';
 import '../../core/providers/storage_providers.dart';
 import '../../core/providers/navigation_provider.dart';
 import '../../core/router/app_router.dart';
+import '../../core/theme/app_theme.dart';
 import '../settings/utils/editor_utils.dart';
 import 'utils.dart';
 
@@ -229,164 +230,213 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 700;
+
+    if (isMobile) {
+      return Scaffold(
+        key: _scaffoldKey,
+        appBar: _buildAppBar(isMobile),
+        drawer: const Drawer(child: RequestSidebar()),
+        body: _buildEditorContent(),
+        bottomNavigationBar: _buildBottomNav(context),
+      );
+    }
+
     return Scaffold(
-      key: _scaffoldKey,
-      appBar: AppBar(
-        title: TextField(
-          controller: _nameController,
-          style: const TextStyle(color: Colors.white, fontSize: 18),
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            hintText: 'Request Name',
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu),
-          onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.save), onPressed: _saveRequest),
-          if (_response != null)
-            IconButton(
-              icon: const Icon(Icons.analytics_outlined),
-              onPressed: () {
-                AppRouter.push(
-                  context,
-                  AppRouter.responseView,
-                  arguments: ResponseViewArguments(
-                    response: _response,
-                    request: _getCurrentRequest(),
-                  ),
-                );
-              },
-            ),
-        ],
-      ),
-      drawer: const RequestSidebar(),
-      body: Column(
+      backgroundColor: AppTheme.backgroundColor,
+      body: Row(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                    ),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedMethod,
-                      items: _methods.map((String method) {
-                        return DropdownMenuItem<String>(
-                          value: method,
-                          child: Text(
-                            method,
-                            style: TextStyle(
-                              color: _getMethodColor(method),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        if (newValue != null) {
-                          setState(() {
-                            _selectedMethod = newValue;
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _urlController,
-                    decoration: const InputDecoration(
-                      hintText: 'https://api.example.com/v1/resource',
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _sendRequest,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blueAccent,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Text('SEND'),
-                ),
-              ],
-            ),
-          ),
-          TabBar(
-            controller: _tabController,
-            isScrollable: true,
-            tabs: const [
-              Tab(text: 'Params'),
-              Tab(text: 'Headers'),
-              Tab(text: 'Body'),
-              Tab(text: 'Auth'),
-              Tab(text: 'Settings'),
-            ],
-            indicatorColor: Colors.blueAccent,
-            labelColor: Colors.blueAccent,
-            unselectedLabelColor: Colors.white.withValues(alpha: 0.5),
-          ),
+          const RequestSidebar(),
           Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildKeyValueEditor(_params, (newList) {
-                  setState(() => _params = newList);
-                  _updateUrlFromParams();
-                }, 'params'),
-                _buildKeyValueEditor(
-                  _headers,
-                  (newList) => setState(() => _headers = newList),
-                  'headers',
-                ),
-                _buildBodyEditor(),
-                _buildAuthEditor(),
-                _buildSettingsEditor(),
-              ],
+            child: Scaffold(
+              key: _scaffoldKey,
+              appBar: _buildAppBar(isMobile),
+              body: _buildEditorContent(),
+              bottomNavigationBar: _buildBottomNav(context),
             ),
           ),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar(bool isMobile) {
+    return AppBar(
+      title: TextField(
+        controller: _nameController,
+        style: const TextStyle(color: Colors.white, fontSize: 18),
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          hintText: 'Request Name',
+        ),
+      ),
+      leading: isMobile
+          ? IconButton(
+              icon: const Icon(Icons.menu),
+              onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+            )
+          : null,
+      actions: [
+        IconButton(icon: const Icon(Icons.save), onPressed: _saveRequest),
+        if (_response != null)
+          IconButton(
+            icon: const Icon(Icons.analytics_outlined),
+            onPressed: () {
+              AppRouter.push(
+                context,
+                AppRouter.responseView,
+                arguments: ResponseViewArguments(
+                  response: _response,
+                  request: _getCurrentRequest(),
+                ),
+              );
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildEditorContent() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    value: _selectedMethod,
+                    items: _methods.map((String method) {
+                      return DropdownMenuItem<String>(
+                        value: method,
+                        child: Text(
+                          method,
+                          style: TextStyle(
+                            color: _getMethodColor(method),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedMethod = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: TextField(
+                  controller: _urlController,
+                  decoration: const InputDecoration(
+                    hintText: 'https://api.example.com/v1/resource',
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton(
+                onPressed: _isLoading ? null : _sendRequest,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blueAccent,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: _isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('SEND'),
+              ),
+            ],
+          ),
+        ),
+        TabBar(
+          controller: _tabController,
+          isScrollable: true,
+          tabs: const [
+            Tab(text: 'Params'),
+            Tab(text: 'Headers'),
+            Tab(text: 'Body'),
+            Tab(text: 'Auth'),
+            Tab(text: 'Settings'),
+          ],
+          indicatorColor: Colors.blueAccent,
+          labelColor: Colors.blueAccent,
+          unselectedLabelColor: Colors.white.withValues(alpha: 0.5),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildKeyValueEditor(_params, (newList) {
+                setState(() => _params = newList);
+                _updateUrlFromParams();
+              }, 'params'),
+              _buildKeyValueEditor(
+                _headers,
+                (newList) => setState(() => _headers = newList),
+                'headers',
+              ),
+              _buildBodyEditor(),
+              _buildAuthEditor(),
+              _buildSettingsEditor(),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBottomNav(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: Colors.white.withValues(alpha: 0.05),
+            width: 1,
+          ),
+        ),
+      ),
+      child: BottomNavigationBar(
         currentIndex: 0,
         onTap: (index) {
           ref.read(navigationIndexProvider.notifier).state = index;
           context.go(AppRouter.root);
         },
         type: BottomNavigationBarType.fixed,
+        selectedFontSize: 11,
+        unselectedFontSize: 11,
+        iconSize: 20,
+        elevation: 0,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.dashboard_outlined),

@@ -13,98 +13,104 @@ class SocketSidebar extends ConsumerWidget {
     final selectedId = ref.watch(selectedSocketIdProvider);
 
     return Container(
-      width: 280,
-      decoration: BoxDecoration(
+      width: 300,
+      decoration: const BoxDecoration(
         color: AppTheme.surfaceColor,
-        border: Border(
-          right: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-        ),
+        border: Border(right: BorderSide(color: Colors.white10)),
       ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Connections',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add_box_outlined, size: 24),
-                  onPressed: () => _createNewConnection(ref),
-                  color: AppTheme.primaryColor,
-                ),
-              ],
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Connections',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.add_box_outlined, size: 24),
+                    onPressed: () => _createNewConnection(ref),
+                    color: AppTheme.primaryColor,
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: connections.isEmpty
-                ? Center(
-                    child: Text(
-                      'No connections',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: connections.length,
-                    itemBuilder: (context, index) {
-                      final conn = connections[index];
-                      final isSelected = conn.id == selectedId;
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: AppTheme.primaryColor.withValues(
-                          alpha: 0.1,
-                        ),
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(
-                              conn.status,
-                            ).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.cable,
-                            color: _getStatusColor(conn.status),
-                            size: 18,
-                          ),
-                        ),
-                        title: Text(
-                          conn.name,
-                          style: TextStyle(
-                            color: isSelected
-                                ? AppTheme.primaryColor
-                                : Colors.white,
-                            fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.bold : null,
-                          ),
-                        ),
-                        subtitle: Text(
-                          conn.url,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        onTap: () => _onSocketSelected(context, ref, conn.id),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18),
-                          onPressed: () =>
-                              _deleteConnection(context, ref, conn.id),
+            const Divider(height: 1),
+            Expanded(
+              child: connections.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No connections',
+                        style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.3),
                         ),
-                      );
-                    },
-                  ),
-          ),
-        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: connections.length,
+                      itemBuilder: (context, index) {
+                        final conn = connections[index];
+                        final isSelected = conn.id == selectedId;
+                        return ListTile(
+                          dense: true,
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 0,
+                          ),
+                          selected: isSelected,
+                          selectedTileColor: AppTheme.primaryColor.withValues(
+                            alpha: 0.1,
+                          ),
+                          leading: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: _getStatusColor(
+                                conn.status,
+                              ).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Icon(
+                              Icons.cable,
+                              color: _getStatusColor(conn.status),
+                              size: 18,
+                            ),
+                          ),
+                          title: Text(
+                            conn.name,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppTheme.primaryColor
+                                  : Colors.white,
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.bold : null,
+                            ),
+                          ),
+                          subtitle: Text(
+                            conn.url,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.white.withValues(alpha: 0.4),
+                            ),
+                          ),
+                          onTap: () => _onSocketSelected(context, ref, conn.id),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete_outline, size: 18),
+                            onPressed: () =>
+                                _deleteConnection(context, ref, conn.id),
+                            color: Colors.white.withValues(alpha: 0.3),
+                          ),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }

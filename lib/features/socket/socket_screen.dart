@@ -46,7 +46,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
   @override
   Widget build(BuildContext context) {
     final currentSocket = ref.watch(currentSocketProvider);
-    final isMobile = MediaQuery.of(context).size.width < 800;
+    final isMobile = MediaQuery.of(context).size.width < 700;
 
     // Update controllers when socket changes
     ref.listen(currentSocketProvider, (previous, next) {
@@ -283,9 +283,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
                       : socket.events.first,
                   decoration: const InputDecoration(
                     labelText: 'Event',
-                    labelStyle: TextStyle(
-                      color: AppTheme.secondaryTextColor
-                    ),
+                    labelStyle: TextStyle(color: AppTheme.secondaryTextColor),
                     border: OutlineInputBorder(),
                     contentPadding: EdgeInsets.symmetric(
                       horizontal: 12,
@@ -357,9 +355,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             },
             decoration: const InputDecoration(
               labelText: 'Payload',
-              labelStyle: TextStyle(
-                color: AppTheme.secondaryTextColor
-              ),
+              labelStyle: TextStyle(color: AppTheme.secondaryTextColor),
               alignLabelWithHint: true,
               border: OutlineInputBorder(),
               hintText: 'Enter message or JSON...',
