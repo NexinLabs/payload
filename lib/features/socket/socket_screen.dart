@@ -42,8 +42,6 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedSocketId = ref.watch(selectedSocketIdProvider);
-    final connections = ref.watch(socketConnectionsProvider);
     final currentSocket = ref.watch(currentSocketProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
 
@@ -54,135 +52,9 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
       }
     });
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('WebSocket Master'),
-        leading: isMobile
-            ? Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
-              )
-            : null,
-      ),
-      drawer: isMobile
-          ? Drawer(child: _buildSidebar(connections, selectedSocketId))
-          : null,
-      body: Row(
-        children: [
-          // Sidebar (only on desktop)
-          if (!isMobile) _buildSidebar(connections, selectedSocketId),
-
-          // Main Content
-          Expanded(
-            child: currentSocket == null
-                ? _buildEmptyState()
-                : _buildMainContent(currentSocket, isMobile),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSidebar(
-    List<SocketConnectionModel> connections,
-    String? selectedId,
-  ) {
-    return Container(
-      width: 280,
-      decoration: BoxDecoration(
-        color: AppTheme.surfaceColor,
-        border: Border(
-          right: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Connections',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.add_box_outlined, size: 24),
-                  onPressed: _createNewConnection,
-                  color: AppTheme.primaryColor,
-                ),
-              ],
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: connections.isEmpty
-                ? Center(
-                    child: Text(
-                      'No connections',
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.3),
-                      ),
-                    ),
-                  )
-                : ListView.builder(
-                    itemCount: connections.length,
-                    itemBuilder: (context, index) {
-                      final conn = connections[index];
-                      final isSelected = conn.id == selectedId;
-                      return ListTile(
-                        selected: isSelected,
-                        selectedTileColor: AppTheme.primaryColor.withValues(
-                          alpha: 0.1,
-                        ),
-                        leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: _getStatusColor(
-                              conn.status,
-                            ).withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Icon(
-                            Icons.cable,
-                            color: _getStatusColor(conn.status),
-                            size: 18,
-                          ),
-                        ),
-                        title: Text(
-                          conn.name,
-                          style: TextStyle(
-                            color: isSelected
-                                ? AppTheme.primaryColor
-                                : Colors.white,
-                            fontSize: 14,
-                            fontWeight: isSelected ? FontWeight.bold : null,
-                          ),
-                        ),
-                        subtitle: Text(
-                          conn.url,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.4),
-                          ),
-                        ),
-                        onTap: () => _onSocketSelected(conn.id),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete_outline, size: 18),
-                          onPressed: () => _deleteConnection(conn.id),
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-        ],
-      ),
-    );
+    return currentSocket == null
+        ? _buildEmptyState()
+        : _buildMainContent(currentSocket, isMobile);
   }
 
   Widget _buildEmptyState() {
@@ -574,23 +446,6 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
     );
     ref.read(socketConnectionsProvider.notifier).addConnection(newConn);
     ref.read(selectedSocketIdProvider.notifier).state = newConn.id;
-  }
-
-  void _deleteConnection(String id) {
-    ref.read(socketConnectionsProvider.notifier).deleteConnection(id);
-    if (ref.read(selectedSocketIdProvider) == id) {
-      ref.read(selectedSocketIdProvider.notifier).state = null;
-    }
-    if (MediaQuery.of(context).size.width < 800) {
-      Navigator.pop(context); // Close drawer
-    }
-  }
-
-  void _onSocketSelected(String id) {
-    ref.read(selectedSocketIdProvider.notifier).state = id;
-    if (MediaQuery.of(context).size.width < 800) {
-      Navigator.maybePop(context); // Close drawer if it's open
-    }
   }
 
   void _updateSocket(SocketConnectionModel socket) {

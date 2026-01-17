@@ -6,6 +6,7 @@ import 'package:payload/features/history/history_screen.dart';
 import 'package:payload/features/collections/collections_screen.dart';
 import 'package:payload/features/settings/settings_screen.dart';
 import 'package:payload/features/socket/socket_screen.dart';
+import 'package:payload/features/socket/components/socket_sidebar.dart';
 import 'package:payload/core/router/app_router.dart';
 import 'package:payload/features/request/components/request_sidebar.dart';
 import 'package:payload/core/providers/navigation_provider.dart';
@@ -24,6 +25,36 @@ class NavigationShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(navigationIndexProvider);
+    final isMobile = MediaQuery.of(context).size.width < 800;
+
+    // Dynamic Sidebar and Title based on selected tab
+    Widget sidebarContent;
+    String title;
+    switch (selectedIndex) {
+      case 0:
+        title = 'Dashboard';
+        sidebarContent = const RequestSidebar();
+        break;
+      case 1:
+        title = 'History';
+        sidebarContent = const RequestSidebar();
+        break;
+      case 2:
+        title = 'Collections';
+        sidebarContent = const RequestSidebar();
+        break;
+      case 3:
+        title = 'WebSocket Master';
+        sidebarContent = const SocketSidebar();
+        break;
+      case 4:
+        title = 'Settings';
+        sidebarContent = const RequestSidebar();
+        break;
+      default:
+        title = Config.appName;
+        sidebarContent = const RequestSidebar();
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -31,9 +62,17 @@ class NavigationShell extends ConsumerWidget {
           children: [
             Image.asset('assets/app_logo.png', height: 24),
             const SizedBox(width: 10),
-            const Text(Config.appName),
+            Text(title),
           ],
         ),
+        leading: isMobile
+            ? Builder(
+                builder: (context) => IconButton(
+                  icon: const Icon(Icons.menu),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              )
+            : null,
         actions: [
           IconButton(
             icon: const Icon(Icons.add),
@@ -44,9 +83,14 @@ class NavigationShell extends ConsumerWidget {
           const SizedBox(width: 8),
         ],
       ),
-      drawer: const RequestSidebar(),
-      body: SafeArea(
-        child: IndexedStack(index: selectedIndex, children: _screens),
+      drawer: isMobile ? sidebarContent : null,
+      body: Row(
+        children: [
+          if (!isMobile) sidebarContent,
+          Expanded(
+            child: IndexedStack(index: selectedIndex, children: _screens),
+          ),
+        ],
       ),
       bottomNavigationBar: SafeArea(
         child: BottomNavigationBar(
