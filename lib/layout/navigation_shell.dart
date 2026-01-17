@@ -5,6 +5,7 @@ import 'package:payload/features/dashboard/dashboard_screen.dart';
 import 'package:payload/features/history/history_screen.dart';
 import 'package:payload/features/collections/collections_screen.dart';
 import 'package:payload/features/settings/settings_screen.dart';
+import 'package:payload/features/socket/socket_screen.dart';
 import 'package:payload/core/router/app_router.dart';
 import 'package:payload/features/request/components/request_sidebar.dart';
 import 'package:payload/core/providers/navigation_provider.dart';
@@ -16,6 +17,7 @@ class NavigationShell extends ConsumerWidget {
     DashboardScreen(),
     HistoryScreen(),
     CollectionsScreen(),
+    WebSocketScreen(),
     SettingsScreen(),
   ];
 
@@ -68,6 +70,11 @@ class NavigationShell extends ConsumerWidget {
               icon: Icon(Icons.folder_outlined),
               activeIcon: Icon(Icons.folder),
               label: 'Collections',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.electrical_services_outlined),
+              activeIcon: Icon(Icons.electrical_services),
+              label: 'Socket',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.settings_outlined),

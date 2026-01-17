@@ -4,6 +4,7 @@ import '../../core/providers/storage_providers.dart';
 import '../../core/models/collection.dart';
 import '../../core/router/app_router.dart';
 import '../../core/models/http_request.dart';
+import '../../core/services/curl_parser_service.dart';
 
 class CollectionsScreen extends ConsumerWidget {
   const CollectionsScreen({super.key});
@@ -158,6 +159,17 @@ class CollectionsScreen extends ConsumerWidget {
             },
           ),
           ListTile(
+            leading: const Icon(Icons.code, color: Colors.white70),
+            title: const Text(
+              'Import CURL',
+              style: TextStyle(color: Colors.white),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              _showImportCurlDialog(context, ref, collection.id);
+            },
+          ),
+          ListTile(
             leading: const Icon(Icons.delete, color: Colors.redAccent),
             title: const Text(
               'Delete Collection',
@@ -232,6 +244,71 @@ class CollectionsScreen extends ConsumerWidget {
               ref.read(collectionsProvider.notifier).deleteRequest(request.id);
               Navigator.pop(context);
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showImportCurlDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String collectionId,
+  ) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Import CURL'),
+        content: TextField(
+          controller: controller,
+          maxLines: 5,
+          decoration: const InputDecoration(
+            hintText: 'Paste curl command here...',
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              if (controller.text.trim().isEmpty) return;
+              try {
+                final request = CurlParserService.parse(controller.text.trim());
+                if (request.url.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Could not find a valid URL in the CURL command',
+                      ),
+                    ),
+                  );
+                  return;
+                }
+                ref
+                    .read(collectionsProvider.notifier)
+                    .addRequestToCollection(collectionId, request);
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Imported: ${request.method} ${request.url}'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Failed to parse CURL: $e'),
+                    backgroundColor: Colors.redAccent,
+                  ),
+                );
+              }
+            },
+            child: const Text('Import'),
           ),
         ],
       ),
