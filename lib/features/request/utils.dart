@@ -116,7 +116,7 @@ class RequestUtils {
         finalRequest = request.copyWith(
           headers: [
             ...request.headers,
-            KeyValue(key: 'Cookies', value: '<@Cookies>', enabled: true),
+            KeyValue(key: 'Cookies', value: '{{Cookies}}', enabled: true),
           ],
         );
       }

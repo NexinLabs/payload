@@ -14,9 +14,9 @@ class RequestService {
     for (var env in environments) {
       if (env.enabled && env.key.isNotEmpty) {
         result = result.replaceAll(
-          '<@${env.key}>',
+          '{{${env.key}}}',
           env.value,
-        ); //trigger format : <@KEY_NAME>
+        ); //trigger format : {{KEY_NAME}}
       }
     }
     return result;
@@ -54,14 +54,18 @@ class RequestService {
     // final url = _replacePlaceholders(request.url, environments);
     final url = request.url;
 
+    final requestHeaders = {
+      for (var h in request.headers)
+        if (h.enabled && h.key.trim().isNotEmpty)
+          h.key.trim(): _replacePlaceholders(h.value, environments),
+    };
+
     final options = Options(
       method: request.method,
       headers: {
-        // static headers
-        "user-agent": Config.client,
-        for (var h in request.headers)
-          if (h.enabled && h.key.trim().isNotEmpty)
-            h.key.trim(): _replacePlaceholders(h.value, environments),
+        if (!requestHeaders.keys.any((k) => k.toLowerCase() == 'user-agent'))
+          'user-agent': Config.client,
+        ...requestHeaders,
       },
       validateStatus: (status) => true,
     );
@@ -82,7 +86,9 @@ class RequestService {
           if (f.enabled && f.key.trim().isNotEmpty)
             f.key.trim(): _replacePlaceholders(f.value, environments),
       });
-    } else if (request.bodyType == 'files') {
+    } 
+    
+    else if (request.bodyType == 'files') {
       data = FormData();
       for (var path in request.filePaths) {
         final fileName = path.split('/').last;
@@ -102,6 +108,8 @@ class RequestService {
       options: options,
       queryParameters: queryParameters,
     );
+
+
     final endTime = DateTime.now();
     response.extra['responseTime'] = endTime
         .difference(startTime)
