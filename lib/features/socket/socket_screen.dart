@@ -46,7 +46,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
   @override
   Widget build(BuildContext context) {
     final currentSocket = ref.watch(currentSocketProvider);
-    final isMobile = MediaQuery.of(context).size.width < 700;
+    final isMobile = MediaQuery.of(context).size.width < 800;
 
     // Update controllers when socket changes
     ref.listen(currentSocketProvider, (previous, next) {
@@ -278,7 +278,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: socket.events.contains(_selectedEvent)
+                  initialValue: socket.events.contains(_selectedEvent)
                       ? _selectedEvent
                       : socket.events.first,
                   decoration: const InputDecoration(
