@@ -58,7 +58,7 @@ class RequestSidebar extends ConsumerWidget {
                   const Expanded(
                     child: Text(
                       Config.appName,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.bold,

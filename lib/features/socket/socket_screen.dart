@@ -278,7 +278,7 @@ class _WebSocketScreenState extends ConsumerState<WebSocketScreen> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: socket.events.contains(_selectedEvent)
+                  initialValue: socket.events.contains(_selectedEvent)
                       ? _selectedEvent
                       : socket.events.first,
                   decoration: const InputDecoration(
