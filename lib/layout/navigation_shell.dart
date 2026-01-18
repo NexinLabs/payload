@@ -13,6 +13,9 @@ import 'package:payload/core/providers/navigation_provider.dart';
 import 'package:payload/core/providers/storage_providers.dart';
 import 'package:payload/core/theme/app_theme.dart';
 
+final GlobalKey<ScaffoldState> _navigationScaffoldKey =
+    GlobalKey<ScaffoldState>();
+
 class NavigationShell extends ConsumerWidget {
   const NavigationShell({super.key});
 
@@ -27,13 +30,14 @@ class NavigationShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(navigationIndexProvider);
-    final isMobile = MediaQuery.of(context).size.width < 700;
+    final isMobile = MediaQuery.of(context).size.width < 800;
 
     // Dynamic Sidebar and Title based on selected tab
     final (title, sidebarContent) = _getNavigationData(selectedIndex);
 
     if (isMobile) {
       return Scaffold(
+        key: _navigationScaffoldKey,
         // On mobile, the sidebar is hidden behind a drawer
         drawer: Drawer(child: sidebarContent),
         body: _buildMainContent(
@@ -102,11 +106,10 @@ class NavigationShell extends ConsumerWidget {
         title: Text(title),
         centerTitle: false,
         leading: isMobile
-            ? Builder(
-                builder: (context) => IconButton(
-                  icon: const Icon(Icons.menu),
-                  onPressed: () => Scaffold.of(context).openDrawer(),
-                ),
+            ? IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () =>
+                    _navigationScaffoldKey.currentState?.openDrawer(),
               )
             : null,
         actions: [

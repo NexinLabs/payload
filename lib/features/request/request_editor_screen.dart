@@ -230,7 +230,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isMobile = MediaQuery.of(context).size.width < 700;
+    final isMobile = MediaQuery.of(context).size.width < 800;
 
     if (isMobile) {
       return Scaffold(

@@ -89,7 +89,7 @@ class RequestSidebar extends ConsumerWidget {
                 if (selectedCollection != null) {
                   final isMobile = MediaQuery.of(context).size.width < 800;
                   if (isMobile) {
-                    AppRouter.pop(context);
+                    Navigator.pop(context); // Use Navigator.pop for Drawer
                   }
                   AppRouter.push(
                     context,
@@ -176,7 +176,7 @@ class RequestSidebar extends ConsumerWidget {
               onAddPressed: () {
                 final isMobile = MediaQuery.of(context).size.width < 800;
                 if (isMobile) {
-                  AppRouter.pop(context);
+                  Navigator.pop(context);
                 }
                 AppRouter.replace(context, AppRouter.requestEditor);
               },
@@ -285,24 +285,22 @@ class RequestSidebar extends ConsumerWidget {
     bool isExpanded = true,
     bool isWrap = false,
   }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: onToggle,
-            child: Icon(
+    return InkWell(
+      onTap: onToggle,
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 4.0),
+        child: Row(
+          children: [
+            Icon(
               isExpanded
                   ? Icons.keyboard_arrow_down
                   : Icons.keyboard_arrow_right,
               size: 18,
               color: Colors.white54,
             ),
-          ),
-          const SizedBox(width: 4),
-          Expanded(
-            child: GestureDetector(
-              onTap: onToggle,
+            const SizedBox(width: 4),
+            Expanded(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -330,38 +328,46 @@ class RequestSidebar extends ConsumerWidget {
                 ],
               ),
             ),
-          ),
-          if (onWrapToggle != null)
-            IconButton(
-              icon: Icon(
-                isWrap ? Icons.wrap_text : Icons.short_text,
-                size: 18,
+            if (onWrapToggle != null)
+              _buildSmallButton(
+                icon: isWrap ? Icons.wrap_text : Icons.short_text,
+                onPressed: onWrapToggle,
+                tooltip: 'Toggle Wrap',
                 color: isWrap ? Colors.blueAccent : Colors.white54,
               ),
-              onPressed: onWrapToggle,
-              tooltip: 'Toggle Wrap Requests',
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-            ),
-          if (onSettingsPressed != null)
-            IconButton(
-              icon: const Icon(
-                Icons.settings_outlined,
-                size: 18,
-                color: Colors.white54,
+            if (onSettingsPressed != null)
+              _buildSmallButton(
+                icon: Icons.settings_outlined,
+                onPressed: onSettingsPressed,
+                tooltip: 'Settings',
               ),
-              onPressed: onSettingsPressed,
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-            ),
-          if (onAddPressed != null)
-            IconButton(
-              icon: const Icon(Icons.add, size: 18, color: Colors.white54),
-              onPressed: onAddPressed,
-              constraints: const BoxConstraints(),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-            ),
-        ],
+            if (onAddPressed != null)
+              _buildSmallButton(
+                icon: Icons.add,
+                onPressed: onAddPressed,
+                tooltip: 'Add',
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSmallButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+    required String tooltip,
+    Color color = Colors.white54,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: IconButton(
+        icon: Icon(icon, size: 18, color: color),
+        onPressed: onPressed,
+        tooltip: tooltip,
+        constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+        padding: const EdgeInsets.all(4),
+        splashRadius: 16,
       ),
     );
   }
