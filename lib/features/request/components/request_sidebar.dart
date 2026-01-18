@@ -7,10 +7,29 @@ import '../../../core/models/collection.dart';
 import '../../../core/providers/storage_providers.dart';
 import '../../../core/router/app_router.dart';
 
-final isRequestsExpandedProvider = StateProvider<bool>((ref) => true);
-final isWrapRequestsProvider = StateProvider<bool>((ref) => false);
-final isCollectionsExpandedProvider = StateProvider<bool>((ref) => true);
-final isWrapCollectionsProvider = StateProvider<bool>((ref) => false);
+class BoolNotifier extends Notifier<bool> {
+  final bool initialValue;
+  BoolNotifier(this.initialValue);
+
+  @override
+  bool build() => initialValue;
+
+  @override
+  set state(bool value) => super.state = value;
+}
+
+final isRequestsExpandedProvider = NotifierProvider<BoolNotifier, bool>(
+  () => BoolNotifier(true),
+);
+final isWrapRequestsProvider = NotifierProvider<BoolNotifier, bool>(
+  () => BoolNotifier(false),
+);
+final isCollectionsExpandedProvider = NotifierProvider<BoolNotifier, bool>(
+  () => BoolNotifier(true),
+);
+final isWrapCollectionsProvider = NotifierProvider<BoolNotifier, bool>(
+  () => BoolNotifier(false),
+);
 
 class RequestSidebar extends ConsumerWidget {
   const RequestSidebar({super.key});
