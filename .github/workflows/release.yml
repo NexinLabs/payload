@@ -33,7 +33,7 @@ jobs:
         run: flutter build apk --release
 
       - name: Rename Fat APK
-        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/payload-universal.apk
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/payload-release.apk
 
       - name: Build ARM64 APK
         run: flutter build apk --release --target-platform android-arm64
@@ -47,7 +47,7 @@ jobs:
         if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         with:
           files: |
-            build/app/outputs/flutter-apk/payload-universal.apk
+            build/app/outputs/flutter-apk/payload-release.apk
             build/app/outputs/flutter-apk/payload-arm64.apk
           tag_name: ${{ github.event.release.tag_name || format('v1.1.0-{0}', github.run_number) }}
           name: ${{ github.event.release.name || format('Release v1.1.0-{0}', github.run_number) }}

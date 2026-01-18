@@ -12,16 +12,22 @@ final socketServiceProvider = Provider.autoDispose((ref) {
 });
 
 final socketConnectionsProvider =
-    StateNotifierProvider<
-      SocketConnectionsNotifier,
-      List<SocketConnectionModel>
-    >((ref) {
-      final service = ref.watch(socketServiceProvider);
-      final storage = ref.watch(storageServiceProvider);
-      return SocketConnectionsNotifier(service, storage);
-    });
+    NotifierProvider<SocketConnectionsNotifier, List<SocketConnectionModel>>(
+      SocketConnectionsNotifier.new,
+    );
 
-final selectedSocketIdProvider = StateProvider<String?>((ref) => null);
+class SelectedSocketIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
+
+  @override
+  set state(String? value) => super.state = value;
+}
+
+final selectedSocketIdProvider =
+    NotifierProvider<SelectedSocketIdNotifier, String?>(
+      SelectedSocketIdNotifier.new,
+    );
 
 final currentSocketProvider = Provider<SocketConnectionModel?>((ref) {
   final id = ref.watch(selectedSocketIdProvider);
@@ -33,16 +39,26 @@ final currentSocketProvider = Provider<SocketConnectionModel?>((ref) {
   );
 });
 
-class SocketConnectionsNotifier
-    extends StateNotifier<List<SocketConnectionModel>> {
-  final SocketService _service;
-  final StorageService _storageService;
+class SocketConnectionsNotifier extends Notifier<List<SocketConnectionModel>> {
+  late SocketService _service;
+  late StorageService _storageService;
   StreamSubscription? _messageSub;
   StreamSubscription? _statusSub;
 
-  SocketConnectionsNotifier(this._service, this._storageService) : super([]) {
+  @override
+  List<SocketConnectionModel> build() {
+    _service = ref.watch(socketServiceProvider);
+    _storageService = ref.watch(storageServiceProvider);
+
     _loadConnections();
     _listenToService();
+
+    ref.onDispose(() {
+      _messageSub?.cancel();
+      _statusSub?.cancel();
+    });
+
+    return [];
   }
 
   Future<void> _loadConnections() async {
@@ -64,13 +80,6 @@ class SocketConnectionsNotifier
     _statusSub = _service.status.listen((update) {
       updateStatus(update.socketId, update.status);
     });
-  }
-
-  @override
-  void dispose() {
-    _messageSub?.cancel();
-    _statusSub?.cancel();
-    super.dispose();
   }
 
   Future<void> addConnection(SocketConnectionModel connection) async {

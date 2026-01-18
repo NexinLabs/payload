@@ -6,32 +6,41 @@ import '../services/storage_service.dart';
 
 final storageServiceProvider = Provider((ref) => StorageService());
 
-final settingsProvider = StateNotifierProvider<SettingsNotifier, SettingsModel>(
-  (ref) {
-    final storage = ref.watch(storageServiceProvider);
-    return SettingsNotifier(storage);
-  },
+final settingsProvider = NotifierProvider<SettingsNotifier, SettingsModel>(
+  SettingsNotifier.new,
 );
 
 final collectionsProvider =
-    StateNotifierProvider<CollectionsNotifier, List<CollectionModel>>((ref) {
-      final storage = ref.watch(storageServiceProvider);
-      return CollectionsNotifier(storage);
-    });
+    NotifierProvider<CollectionsNotifier, List<CollectionModel>>(
+      CollectionsNotifier.new,
+    );
 
 final historyProvider =
-    StateNotifierProvider<HistoryNotifier, List<HttpRequestModel>>((ref) {
-      final storage = ref.watch(storageServiceProvider);
-      return HistoryNotifier(storage);
-    });
+    NotifierProvider<HistoryNotifier, List<HttpRequestModel>>(
+      HistoryNotifier.new,
+    );
 
-final selectedCollectionIdProvider = StateProvider<String?>((ref) => null);
+class SelectedCollectionIdNotifier extends Notifier<String?> {
+  @override
+  String? build() => null;
 
-class SettingsNotifier extends StateNotifier<SettingsModel> {
-  final StorageService _storage;
+  @override
+  set state(String? value) => super.state = value;
+}
 
-  SettingsNotifier(this._storage) : super(SettingsModel()) {
+final selectedCollectionIdProvider =
+    NotifierProvider<SelectedCollectionIdNotifier, String?>(
+      SelectedCollectionIdNotifier.new,
+    );
+
+class SettingsNotifier extends Notifier<SettingsModel> {
+  late StorageService _storage;
+
+  @override
+  SettingsModel build() {
+    _storage = ref.watch(storageServiceProvider);
     _load();
+    return SettingsModel();
   }
 
   Future<void> _load() async {
@@ -44,11 +53,14 @@ class SettingsNotifier extends StateNotifier<SettingsModel> {
   }
 }
 
-class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
-  final StorageService _storage;
+class CollectionsNotifier extends Notifier<List<CollectionModel>> {
+  late StorageService _storage;
 
-  CollectionsNotifier(this._storage) : super([]) {
+  @override
+  List<CollectionModel> build() {
+    _storage = ref.watch(storageServiceProvider);
     _load();
+    return [];
   }
 
   Future<void> _load() async {
@@ -165,11 +177,14 @@ class CollectionsNotifier extends StateNotifier<List<CollectionModel>> {
   }
 }
 
-class HistoryNotifier extends StateNotifier<List<HttpRequestModel>> {
-  final StorageService _storage;
+class HistoryNotifier extends Notifier<List<HttpRequestModel>> {
+  late StorageService _storage;
 
-  HistoryNotifier(this._storage) : super([]) {
+  @override
+  List<HttpRequestModel> build() {
+    _storage = ref.watch(storageServiceProvider);
     _load();
+    return [];
   }
 
   Future<void> _load() async {
