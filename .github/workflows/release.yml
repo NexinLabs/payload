@@ -1,10 +1,9 @@
 name: Release APK
 
 on:
-
+  workflow_dispatch:
   release:
-    branches:
-      - main
+    types: [published]
 
 jobs:
   build:
@@ -24,23 +23,34 @@ jobs:
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.38.5' # Using a stable version
+          flutter-version: '3.38.5'
           channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build Fat APK
         run: flutter build apk --release
 
-      - name: Create Release
+      - name: Rename Fat APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/payload-universal.apk
+
+      - name: Build ARM64 APK
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Rename ARM64 APK
+        run: cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/payload-arm64.apk
+
+      - name: Update Release
         id: create_release
         uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/heads/-main')
+        if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
         with:
-          files: build/app/outputs/flutter-apk/app-release.apk
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          files: |
+            build/app/outputs/flutter-apk/payload-universal.apk
+            build/app/outputs/flutter-apk/payload-arm64.apk
+          tag_name: ${{ github.event.release.tag_name || format('v1.1.0-{0}', github.run_number) }}
+          name: ${{ github.event.release.name || format('Release v1.1.0-{0}', github.run_number) }}
           draft: false
           prerelease: false
         env:
