@@ -18,8 +18,7 @@ Just an API client with the feel of popular desktop API clients like Postman or 
 - [x] Collection Environment
 - [x] Cookie managed environment
 - [x] Pretty json rendering 
-- [ ] Websocket client
-- [ ] Global environment configuration
+- [x] Websocket client
 - [ ] Data encryption even import-export
 - [ ] Plugin Support
 
