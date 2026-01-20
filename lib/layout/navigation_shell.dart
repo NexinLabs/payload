@@ -30,13 +30,15 @@ class NavigationShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedIndex = ref.watch(navigationIndexProvider);
+    final notifier = ref.read(navigationIndexProvider.notifier);
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     // Dynamic Sidebar and Title based on selected tab
     final (title, sidebarContent) = _getNavigationData(selectedIndex);
 
+    Widget shell;
     if (isMobile) {
-      return Scaffold(
+      shell = Scaffold(
         key: _navigationScaffoldKey,
         // On mobile, the sidebar is hidden behind a drawer
         drawer: Drawer(child: sidebarContent),
@@ -49,28 +51,37 @@ class NavigationShell extends ConsumerWidget {
           true, // Show bottom nav on mobile
         ),
       );
+    } else {
+      // On Horizontal/Desktop view
+      shell = Scaffold(
+        backgroundColor: AppTheme.backgroundColor,
+        body: Row(
+          children: [
+            // Sidebar - Full height, scrollable
+            sidebarContent,
+            // Main content area with its own (AppBar + Body + BottomNav)
+            Expanded(
+              child: _buildMainContent(
+                context,
+                ref,
+                title,
+                selectedIndex,
+                isMobile,
+                true,
+              ),
+            ),
+          ],
+        ),
+      );
     }
 
-    // On Horizontal/Desktop view
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundColor,
-      body: Row(
-        children: [
-          // Sidebar - Full height, scrollable
-          sidebarContent,
-          // Main content area with its own (AppBar + Body + BottomNav)
-          Expanded(
-            child: _buildMainContent(
-              context,
-              ref,
-              title,
-              selectedIndex,
-              isMobile,
-              true,
-            ),
-          ),
-        ],
-      ),
+    return PopScope(
+      canPop: !notifier.canGoBack,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        notifier.goBack();
+      },
+      child: shell,
     );
   }
 
@@ -113,14 +124,6 @@ class NavigationShell extends ConsumerWidget {
               )
             : null,
         actions: [
-          if (selectedIndex == 0) // Dashboard
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip: 'Refresh',
-              onPressed: () {
-                // Add refresh logic if needed
-              },
-            ),
           if (selectedIndex == 1) // History
             IconButton(
               icon: const Icon(Icons.delete_sweep),
@@ -161,7 +164,7 @@ class NavigationShell extends ConsumerWidget {
       child: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
-          ref.read(navigationIndexProvider.notifier).state = index;
+          ref.read(navigationIndexProvider.notifier).setIndex(index);
         },
         type: BottomNavigationBarType.fixed,
         selectedFontSize: 11,

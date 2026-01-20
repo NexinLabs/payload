@@ -162,7 +162,7 @@ class SettingsScreen extends ConsumerWidget {
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
                       child: Text('|', style: TextStyle(color: Colors.white10)),
                     ),
-                    _buildCreditLink('NexinLabs', Config.orgGithubUrl),
+                    _buildCreditLink('NexinLabs', Config.orgWebsiteUrl),
                   ],
                 ),
 
