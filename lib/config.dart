@@ -1,6 +1,6 @@
 class Config {
   static const String appName = 'Payload';
-  static const String appVersion = '1.1.13';
+  static const String appVersion = '1.1.14';
   static const String devGithubUrl = "https://github.com/hunter87ff";
   static const String orgGithubUrl = "https://github.com/nexinlabs";
   static const String orgWebsiteUrl = "https://nexinlabs.tech";
