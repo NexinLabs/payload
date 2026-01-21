@@ -104,7 +104,7 @@ class DashboardScreen extends ConsumerWidget {
                     icon: Icons.history,
                     color: Colors.blueAccent,
                     onTap: () {
-                      ref.read(navigationIndexProvider.notifier).state = 1;
+                      ref.read(navigationIndexProvider.notifier).setIndex(1);
                     },
                   ),
                 ),
@@ -117,7 +117,7 @@ class DashboardScreen extends ConsumerWidget {
                     icon: Icons.folder_special,
                     color: Colors.greenAccent,
                     onTap: () {
-                      ref.read(navigationIndexProvider.notifier).state = 2;
+                      ref.read(navigationIndexProvider.notifier).setIndex(2);
                     },
                   ),
                 ),
@@ -154,7 +154,7 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.sync_alt,
                   color: Colors.purple,
                   onTap: () {
-                    ref.read(navigationIndexProvider.notifier).state = 3;
+                    ref.read(navigationIndexProvider.notifier).setIndex(3);
                   },
                 ),
                 QuickActionButton(
@@ -168,7 +168,7 @@ class DashboardScreen extends ConsumerWidget {
                   icon: Icons.folder_special,
                   color: Colors.teal,
                   onTap: () {
-                    ref.read(navigationIndexProvider.notifier).state = 2;
+                    ref.read(navigationIndexProvider.notifier).setIndex(2);
                   },
                 ),
               ],
@@ -187,7 +187,7 @@ class DashboardScreen extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () {
-                    ref.read(navigationIndexProvider.notifier).state = 1;
+                    ref.read(navigationIndexProvider.notifier).setIndex(1);
                   },
                   child: const Text('View All'),
                 ),

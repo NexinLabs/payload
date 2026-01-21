@@ -450,7 +450,7 @@ class _RequestEditorScreenState extends ConsumerState<RequestEditorScreen>
       child: BottomNavigationBar(
         currentIndex: 0,
         onTap: (index) {
-          ref.read(navigationIndexProvider.notifier).state = index;
+          ref.read(navigationIndexProvider.notifier).setIndex(index);
           context.go(AppRouter.root);
         },
         type: BottomNavigationBarType.fixed,
